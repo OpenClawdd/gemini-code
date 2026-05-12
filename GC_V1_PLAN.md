@@ -19,24 +19,28 @@ Key Pillars:
 
 - **Autopilot v2:** Shell hygiene logic with auto-allow for simple read-only
   commands and explicit gating for compound/risky operators.
+- **Autopilot Event History:** Persistent (in-memory) record of all tool calls,
+  decisions, and outcomes.
+- **UI Integration:** Pollux (Buddy) and Cockpit now react to real-time
+  Autopilot events.
+- **Subagent Registry:** Formalized management of specialized roles (Scout,
+  Architect, Surgeon, etc.) with executable definitions.
+- **Model Council Lanes:** Role-based work routing integrated into mission
+  planning.
+- **Customization v0:** Basic in-memory settings for UI preference steering.
 - **Cockpit v0.5:** Functional CLI overlay with Phase tracking, Risk scanning
   (Mission Council), and truncated Mission Goals.
-- **Policy Engine:** Extensible gate logic in `autopilot-command-gate.ts`.
-- **Mission Lifecycle:** Structured `/mission` command that generates executable
-  briefs.
 
 ## 3. Missing v1 Systems
 
 - **Localhost Cockpit Dashboard:** A read-only web view of the Cockpit for
-  better visibility during long tasks.
-- **Real Subagent Registry:** Formalized management of specialized agents
-  (Coder, Tester, Reviewer) with persistent state.
-- **Model Council Specialist Lanes:** Dynamic routing of sub-tasks based on
-  expertise (e.g., UI vs. Backend).
-- **Autopilot Event History:** Persistent log of all tool calls, decisions, and
-  outcomes for audit and Pollux (Buddy) feedback.
-- **Simple Customization:** User-defined "safe" command aliases and
-  project-specific safety rules.
+  better visibility during long tasks. (Blocked by cross-package type linting in
+  Forge Mode).
+- **Persistent Settings:** Moving customization from in-memory to disk.
+- **Subagent Handover Logic:** Formalized protocol for one agent lane "passing
+  the baton" to another.
+- **Improved Council Accuracy:** Refining heuristics for lane detection and risk
+  assessment.
 
 ## 4. Recommended First Implementation Slice: Autopilot Event History
 
