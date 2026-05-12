@@ -50,6 +50,37 @@ export function getAutopilotEvents(): readonly AutopilotEvent[] {
 }
 
 /**
+ * Returns the latest autopilot event.
+ */
+export function getLatestAutopilotEvent(): AutopilotEvent | undefined {
+  return events.length > 0 ? events[0] : undefined;
+}
+
+/**
+ * Returns the latest denied autopilot event.
+ */
+export function getLatestDeniedEvent(): AutopilotEvent | undefined {
+  return events.find((e) => e.decision === 'deny');
+}
+
+/**
+ * Returns the latest suppressed autopilot event.
+ */
+export function getLatestSuppressedEvent(): AutopilotEvent | undefined {
+  return events.find((e) => e.decision === 'suppress');
+}
+
+/**
+ * Returns recent events filtered by decision.
+ */
+export function getRecentEventsByDecision(
+  decision: AutopilotEventDecision,
+  limit = 5,
+): AutopilotEvent[] {
+  return events.filter((e) => e.decision === decision).slice(0, limit);
+}
+
+/**
  * Clears the event history.
  */
 export function clearAutopilotEvents(): void {

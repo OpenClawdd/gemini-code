@@ -119,6 +119,23 @@ export function toggleCockpit(): boolean {
   return cockpitVisible;
 }
 
+export function getCockpitState(): CockpitState {
+  const allEvents = getAutopilotEvents();
+  const recentEvents = allEvents.slice(0, 5);
+  const latestEvent = allEvents.length > 0 ? allEvents[0] : undefined;
+
+  return {
+    visible: cockpitVisible,
+    mission: currentMission ?? undefined,
+    missionBrief: currentMissionBrief ?? undefined,
+    missionCouncil: currentMissionCouncil ?? undefined,
+    phase: currentPhase,
+    detailsExpanded: cockpitDetailsExpanded,
+    recentEvents: [...recentEvents],
+    latestEvent,
+  };
+}
+
 export interface CockpitState {
   visible: boolean;
   mission?: string;
@@ -145,20 +162,7 @@ export function useCockpitState(): CockpitState {
     };
   }, []);
 
-  const allEvents = getAutopilotEvents();
-  const recentEvents = allEvents.slice(0, 3);
-  const latestEvent = allEvents.length > 0 ? allEvents[0] : undefined;
-
-  return {
-    visible: cockpitVisible,
-    mission: currentMission,
-    missionBrief: currentMissionBrief,
-    missionCouncil: currentMissionCouncil,
-    phase: currentPhase,
-    detailsExpanded: cockpitDetailsExpanded,
-    recentEvents,
-    latestEvent,
-  };
+  return getCockpitState();
 }
 
 export function useCockpitVisible(): boolean {

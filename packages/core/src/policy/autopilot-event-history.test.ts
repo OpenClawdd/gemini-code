@@ -9,6 +9,10 @@ import {
   recordAutopilotEvent,
   getAutopilotEvents,
   clearAutopilotEvents,
+  getLatestAutopilotEvent,
+  getLatestDeniedEvent,
+  getLatestSuppressedEvent,
+  getRecentEventsByDecision,
 } from './autopilot-event-history.js';
 
 describe('AutopilotEventHistory', () => {
@@ -85,5 +89,46 @@ describe('AutopilotEventHistory', () => {
     const events2 = getAutopilotEvents();
     expect(events).not.toBe(events2); // Should be different references
     expect(events).toEqual(events2); // But same content
+  });
+
+  it('retrieves the latest event', () => {
+    recordAutopilotEvent({ command: 'cmd1', decision: 'allow', reason: 'r1' });
+    recordAutopilotEvent({ command: 'cmd2', decision: 'deny', reason: 'r2' });
+
+    expect(getLatestAutopilotEvent()?.command).toBe('cmd2');
+  });
+
+  it('retrieves the latest denied event', () => {
+    recordAutopilotEvent({ command: 'deny1', decision: 'deny', reason: 'r1' });
+    recordAutopilotEvent({
+      command: 'allow1',
+      decision: 'allow',
+      reason: 'r2',
+    });
+    recordAutopilotEvent({ command: 'deny2', decision: 'deny', reason: 'r3' });
+    recordAutopilotEvent({
+      command: 'allow2',
+      decision: 'allow',
+      reason: 'r4',
+    });
+
+    expect(getLatestDeniedEvent()?.command).toBe('deny2');
+  });
+
+  it('retrieves the latest suppressed event', () => {
+    recordAutopilotEvent({ command: 's1', decision: 'suppress', reason: 'r1' });
+    recordAutopilotEvent({ command: 'a1', decision: 'allow', reason: 'r2' });
+
+    expect(getLatestSuppressedEvent()?.command).toBe('s1');
+  });
+
+  it('filters recent events by decision', () => {
+    recordAutopilotEvent({ command: 'a1', decision: 'allow', reason: 'r1' });
+    recordAutopilotEvent({ command: 'd1', decision: 'deny', reason: 'r2' });
+    recordAutopilotEvent({ command: 'a2', decision: 'allow', reason: 'r3' });
+
+    const allowed = getRecentEventsByDecision('allow');
+    expect(allowed).toHaveLength(2);
+    expect(allowed[0].command).toBe('a2');
   });
 });
