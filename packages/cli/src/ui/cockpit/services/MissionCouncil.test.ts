@@ -56,4 +56,10 @@ describe('MissionCouncil', () => {
     expect(result.finalRoute.lanes).toContain('ux-voice');
     expect(result.finalRoute.lanes).toContain('risk-officer');
   });
+
+  it('should calculate overall confidence', () => {
+    const result = createMissionCouncilResult('simple task');
+    expect(result.finalRoute.overallConfidence).toBeGreaterThan(0.8);
+    expect(result.finalRoute.laneDetails).toBeDefined();
+  });
 });

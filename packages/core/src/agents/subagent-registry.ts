@@ -13,6 +13,7 @@ export interface SubagentDefinition {
   outputContract: string;
   whenToUse: string;
   whenNotToUse: string;
+  defaultConfidence?: number;
 }
 
 const registry: Map<string, SubagentDefinition> = new Map();

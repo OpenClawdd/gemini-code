@@ -4,6 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+export interface LaneDetail {
+  id: string;
+  confidence: number;
+  reason: string;
+}
+
 export interface MissionCouncilResult {
   scout: {
     contextNeeded: string[];
@@ -25,6 +31,8 @@ export interface MissionCouncilResult {
   finalRoute: {
     firstAction: string;
     lanes: string[];
+    laneDetails?: LaneDetail[];
+    overallConfidence: number;
   };
 }
 
@@ -51,7 +59,15 @@ export function createMissionCouncilResult(
 
   const normalizedRequest = request.toLowerCase();
 
-  const lanes = ['scout', 'surgeon', 'test-captain'];
+  const laneDetails: LaneDetail[] = [
+    { id: 'scout', confidence: 1.0, reason: 'Initial discovery is mandatory.' },
+    { id: 'surgeon', confidence: 0.9, reason: 'Implementation is expected.' },
+    {
+      id: 'test-captain',
+      confidence: 0.9,
+      reason: 'Verification is mandatory.',
+    },
+  ];
 
   if (
     normalizedRequest.includes('without touching auth') ||
@@ -67,7 +83,11 @@ export function createMissionCouncilResult(
     riskOfficer.reasons = [
       'User explicitly said not to touch auth-related code.',
     ];
-    lanes.push('risk-officer');
+    laneDetails.push({
+      id: 'risk-officer',
+      confidence: 1.0,
+      reason: 'Explicit safety boundary detected.',
+    });
   }
 
   if (
@@ -75,8 +95,12 @@ export function createMissionCouncilResult(
     normalizedRequest.includes('redesign') ||
     normalizedRequest.includes('architect')
   ) {
-    lanes.push('architect');
     architect.proposedStructure = ['Multi-phase structural refactor'];
+    laneDetails.push({
+      id: 'architect',
+      confidence: 0.8,
+      reason: 'Structural change requested.',
+    });
   }
 
   if (
@@ -84,16 +108,26 @@ export function createMissionCouncilResult(
     normalizedRequest.includes('css') ||
     normalizedRequest.includes('cockpit')
   ) {
-    lanes.push('ux-voice');
+    laneDetails.push({
+      id: 'ux-voice',
+      confidence: 0.7,
+      reason: 'User interface modification detected.',
+    });
   }
 
   if (normalizedRequest.includes('search')) {
     scout.contextNeeded.push('Identify which search system the user means');
   }
 
+  const uniqueLanes = [...new Set(laneDetails.map((l) => l.id))];
+  const overallConfidence =
+    laneDetails.reduce((sum, l) => sum + l.confidence, 0) / laneDetails.length;
+
   const finalRoute: MissionCouncilResult['finalRoute'] = {
     firstAction: 'Inspect likely files before editing',
-    lanes: [...new Set(lanes)],
+    lanes: uniqueLanes,
+    laneDetails,
+    overallConfidence: Math.round(overallConfidence * 100) / 100,
   };
 
   return {
