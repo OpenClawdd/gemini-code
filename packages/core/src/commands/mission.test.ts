@@ -26,6 +26,8 @@ describe('performMission', () => {
       expect(result.content).toContain('mission brief');
       expect(result.content).toContain('Goal');
       expect(result.content).toContain('Safe plan');
+      expect(result.content).toContain('Command Hygiene');
+      expect(result.content).toContain('Simple commands only');
       expect(result.content).toContain('Narrow preference');
       expect(result.content).toContain('discover the relevant test file first');
       expect(result.content).toContain('Avoid broad commands');

@@ -32,8 +32,32 @@ describe('evaluateAutopilotCommand', () => {
     expect(decision('git diff')).toBe(AutopilotCommandDecision.ALLOW);
   });
 
+  it('allows simple read-only commands', () => {
+    expect(decision('git status')).toBe(AutopilotCommandDecision.ALLOW);
+    expect(decision('git log -n 8 --oneline')).toBe(
+      AutopilotCommandDecision.ALLOW,
+    );
+    expect(decision('git branch --show-current')).toBe(
+      AutopilotCommandDecision.ALLOW,
+    );
+    expect(
+      decision('ls packages/core/src/policy/autopilot-command-gate.ts'),
+    ).toBe(AutopilotCommandDecision.ALLOW);
+  });
+
+  it('asks for compound read-only commands', () => {
+    expect(decision('git status && git log')).toBe(
+      AutopilotCommandDecision.ASK,
+    );
+    expect(decision('git status 2>/dev/null')).toBe(
+      AutopilotCommandDecision.ASK,
+    );
+    expect(decision('git status | cat')).toBe(AutopilotCommandDecision.ASK);
+  });
+
   it('denies destructive or remote-mutating commands', () => {
     expect(decision('git push')).toBe(AutopilotCommandDecision.DENY);
     expect(decision('rm -rf dist')).toBe(AutopilotCommandDecision.DENY);
+    expect(decision('sudo rm -rf /')).toBe(AutopilotCommandDecision.DENY);
   });
 });

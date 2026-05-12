@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { classifyCommand, CommandClass } from './command-hygiene.js';
+
 export enum AutopilotCommandDecision {
   ALLOW = 'allow',
   SUPPRESS = 'suppress',
@@ -20,12 +22,6 @@ export interface AutopilotCommandGateResult {
   decision: AutopilotCommandDecision;
   reason: string;
 }
-
-const destructivePatterns = [
-  /(^|\s)rm\s+-rf(\s|$)/i,
-  /(^|\s)git\s+push(\s|$)/i,
-  /(^|\s)sudo\s+/i,
-];
 
 const broadTestPatterns = [
   /^npm\s+test(?:\s|$)/i,
@@ -63,10 +59,12 @@ export function evaluateAutopilotCommand({
     };
   }
 
-  if (destructivePatterns.some((pattern) => pattern.test(normalizedCommand))) {
+  const classification = classifyCommand(normalizedCommand);
+
+  if (classification === CommandClass.DANGEROUS) {
     return {
       decision: AutopilotCommandDecision.DENY,
-      reason: 'Destructive or remote-mutating commands stay behind the gate.',
+      reason: 'Command is classified as dangerous and stays behind the gate.',
     };
   }
 
@@ -88,10 +86,18 @@ export function evaluateAutopilotCommand({
     };
   }
 
-  if (normalizedCommand === 'git diff') {
+  if (classification === CommandClass.SIMPLE_READ_ONLY) {
     return {
       decision: AutopilotCommandDecision.ALLOW,
-      reason: 'Local diff inspection is safe and useful.',
+      reason: 'Simple read-only commands are auto-allowed for efficiency.',
+    };
+  }
+
+  if (classification === CommandClass.COMPOUND_READ_ONLY) {
+    return {
+      decision: AutopilotCommandDecision.ASK,
+      reason:
+        'Compound commands (using &&, ||, |, >) require permission even if read-only.',
     };
   }
 

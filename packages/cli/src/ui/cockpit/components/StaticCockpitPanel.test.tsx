@@ -29,6 +29,27 @@ describe('StaticCockpitPanel', () => {
     unmount();
   });
 
+  it('should render truncated goal in compact mode for long missions', async () => {
+    const mission =
+      'Very long mission prompt that should be truncated in the compact view because it exceeds eighty characters and we want to keep it clean.';
+    const { lastFrame, unmount, waitUntilReady } = await render(
+      <StaticCockpitPanel />,
+    );
+
+    await act(async () => {
+      activateCockpitMission(mission);
+    });
+
+    await waitUntilReady();
+    const frame = lastFrame();
+    expect(frame).toContain('Mission:');
+    expect(frame).toContain(
+      'Very long mission prompt that should be truncated in the compact view because...',
+    );
+    expect(frame).not.toContain(mission);
+    unmount();
+  });
+
   it('should render active missions compact by default', async () => {
     const mission = 'fix search without touching auth';
     const { lastFrame, unmount, waitUntilReady } = await render(

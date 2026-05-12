@@ -15,7 +15,13 @@ export interface MissionBrief {
 }
 
 export function createMissionBrief(request: string): MissionBrief {
-  const goal = request.trim();
+  const firstLine = request.trim().split('\n')[0];
+  const firstSentence = firstLine.split(/[.!?](?:\s|$)/, 1)[0];
+  const goal =
+    firstSentence.length > 80
+      ? firstSentence.substring(0, 77) + '...'
+      : firstSentence;
+
   return {
     goal,
     lane: 'Unknown',

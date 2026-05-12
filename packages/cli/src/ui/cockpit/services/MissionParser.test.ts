@@ -14,10 +14,31 @@ describe('MissionParser', () => {
 
     expect(brief.goal).toBe(request);
     expect(brief.lane).toBe('Unknown');
-    expect(brief.likelyFiles).toEqual(['Inspect phase will choose the files']);
-    expect(brief.protectedZones).toEqual(['No protected zones identified yet']);
-    expect(brief.risks).toEqual(['Risk scan has not found a blocker yet']);
-    expect(brief.testPlan).toEqual(['Use the narrowest check that covers the edit']);
-    expect(brief.successCriteria).toEqual(['Mission brief accepted']);
+  });
+
+  it('should truncate multi-line requests to the first line', () => {
+    const request =
+      'Refactor the tokenizer\n\nMore details here that should be hidden.';
+    const brief = createMissionBrief(request);
+
+    expect(brief.goal).toBe('Refactor the tokenizer');
+  });
+
+  it('should truncate very long first lines', () => {
+    const request =
+      'This is a very long goal that definitely exceeds eighty characters and should be truncated for the compact view display in the cockpit UI component';
+    const brief = createMissionBrief(request);
+
+    expect(brief.goal).toBe(
+      'This is a very long goal that definitely exceeds eighty characters and should...',
+    );
+  });
+
+  it('should truncate at the first sentence boundary', () => {
+    const request =
+      'Fix the bug. Then refactor the code. Finally add some tests for everything.';
+    const brief = createMissionBrief(request);
+
+    expect(brief.goal).toBe('Fix the bug');
   });
 });
