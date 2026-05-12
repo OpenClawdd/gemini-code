@@ -17,6 +17,7 @@ export * from './output/stream-json-formatter.js';
 export * from './policy/types.js';
 export * from './policy/policy-engine.js';
 export * from './policy/autopilot-command-gate.js';
+export * from './policy/autopilot-event-history.js';
 export * from './policy/toml-loader.js';
 export * from './policy/config.js';
 export * from './policy/integrity.js';

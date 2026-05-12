@@ -31,6 +31,10 @@ import {
   AutopilotCommandDecision,
   evaluateAutopilotCommand,
 } from './autopilot-command-gate.js';
+import {
+  recordAutopilotEvent,
+  type AutopilotEventDecision,
+} from './autopilot-event-history.js';
 import { debugLogger } from '../utils/debugLogger.js';
 import { isRecord } from '../utils/markdownUtils.js';
 import type { CheckerRunner } from '../safety/checker-runner.js';
@@ -324,6 +328,13 @@ export class PolicyEngine {
     const result = evaluateAutopilotCommand({
       mission: this.autopilotMission,
       command,
+    });
+
+    recordAutopilotEvent({
+      command,
+      decision: result.decision as AutopilotEventDecision,
+      reason: result.reason,
+      missionText: this.autopilotMission,
     });
 
     switch (result.decision) {

@@ -7,6 +7,10 @@
 import { describe, it, expect, beforeEach, beforeAll, vi } from 'vitest';
 import { PolicyEngine } from './policy-engine.js';
 import {
+  getAutopilotEvents,
+  clearAutopilotEvents,
+} from './autopilot-event-history.js';
+import {
   PolicyDecision,
   type PolicyRule,
   type PolicyEngineConfig,
@@ -170,7 +174,6 @@ describe('PolicyEngine', () => {
   });
 
   describe('check', () => {
-
     it('should apply Autopilot Command Gate before shell confirmation policy', async () => {
       engine = new PolicyEngine({
         autopilotMission: 'fix README typo without touching core',
@@ -224,6 +227,26 @@ describe('PolicyEngine', () => {
           undefined,
         ),
       ).resolves.toMatchObject({ decision: PolicyDecision.DENY });
+    });
+
+    it('should record autopilot events in history', async () => {
+      clearAutopilotEvents();
+      engine = new PolicyEngine({
+        autopilotMission: 'test mission',
+      });
+
+      await engine.check(
+        { name: 'run_shell_command', args: { command: 'git status' } },
+        undefined,
+      );
+
+      const events = getAutopilotEvents();
+      expect(events).toHaveLength(1);
+      expect(events[0]).toMatchObject({
+        command: 'git status',
+        decision: 'allow',
+        missionText: 'test mission',
+      });
     });
 
     it('should match tool by name', async () => {
