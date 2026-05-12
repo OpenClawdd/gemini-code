@@ -6,6 +6,10 @@
 
 import { useEffect, useState } from 'react';
 import {
+  getAutopilotEvents,
+  type AutopilotEvent,
+} from '@google/gemini-cli-core';
+import {
   createMissionCouncilResult,
   type MissionCouncilResult,
 } from './services/MissionCouncil.js';
@@ -117,11 +121,13 @@ export function toggleCockpit(): boolean {
 
 export interface CockpitState {
   visible: boolean;
-  mission: string | null;
-  missionBrief: MissionBrief | null;
-  missionCouncil: MissionCouncilResult | null;
+  mission?: string;
+  missionBrief?: MissionBrief;
+  missionCouncil?: MissionCouncilResult;
   phase: Phase;
   detailsExpanded: boolean;
+  recentEvents: AutopilotEvent[];
+  latestEvent?: AutopilotEvent;
 }
 
 export function useCockpitState(): CockpitState {
@@ -139,6 +145,10 @@ export function useCockpitState(): CockpitState {
     };
   }, []);
 
+  const allEvents = getAutopilotEvents();
+  const recentEvents = allEvents.slice(0, 3);
+  const latestEvent = allEvents.length > 0 ? allEvents[0] : undefined;
+
   return {
     visible: cockpitVisible,
     mission: currentMission,
@@ -146,6 +156,8 @@ export function useCockpitState(): CockpitState {
     missionCouncil: currentMissionCouncil,
     phase: currentPhase,
     detailsExpanded: cockpitDetailsExpanded,
+    recentEvents,
+    latestEvent,
   };
 }
 

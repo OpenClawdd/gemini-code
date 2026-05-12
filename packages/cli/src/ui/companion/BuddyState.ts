@@ -5,6 +5,10 @@
  */
 
 import { useEffect, useState } from 'react';
+import {
+  getAutopilotEvents,
+  type AutopilotEvent,
+} from '@google/gemini-cli-core';
 
 export type BuddyMood = 'steady' | 'blocked' | 'protective' | 'busy';
 
@@ -71,10 +75,39 @@ export function useBuddyState(): BuddyState {
 
     listeners.add(listener);
 
+    // Initial check for latest event
+    const events = getAutopilotEvents();
+    if (events.length > 0) {
+      updateBuddyFromEvent(events[0]);
+    }
+
     return () => {
       listeners.delete(listener);
     };
   }, []);
 
   return buddyState;
+}
+
+function updateBuddyFromEvent(event: AutopilotEvent): void {
+  switch (event.decision) {
+    case 'deny':
+      setBuddyStatus('blocked', 'Blocked risky command.');
+      break;
+    case 'ask':
+      setBuddyStatus('protective', 'Needs approval.');
+      break;
+    case 'suppress':
+      setBuddyStatus('steady', 'Suppressed command ceremony.');
+      break;
+    case 'allow':
+      // Only update if not already busy/blocked
+      if (buddyState.mood === 'steady' || buddyState.mood === 'busy') {
+        setBuddyStatus('busy', `Running: ${event.command}`);
+      }
+      break;
+    default:
+      // No specific reaction for other cases
+      break;
+  }
 }
