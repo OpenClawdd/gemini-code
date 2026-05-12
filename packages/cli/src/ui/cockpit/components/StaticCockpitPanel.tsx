@@ -20,6 +20,8 @@ export const StaticCockpitPanel: React.FC = () => {
     detailsExpanded,
     latestEvent,
     recentEvents,
+    deferredCount,
+    recentDeferred,
   } = useCockpitState();
   const buddy = useBuddyState();
 
@@ -120,6 +122,22 @@ export const StaticCockpitPanel: React.FC = () => {
               ))}
             </Box>
           )}
+
+          {recentDeferred.length > 0 && (
+            <Box flexDirection="column" marginTop={1}>
+              <Text bold dimColor>
+                DEFERRED COMMANDS
+              </Text>
+              {recentDeferred.map((c) => (
+                <Box key={c.id} marginLeft={1}>
+                  <Box width={11}>
+                    <Text color="yellow">DEFERRED</Text>
+                  </Box>
+                  <Text>{c.command}</Text>
+                </Box>
+              ))}
+            </Box>
+          )}
         </>
       ) : (
         <Box flexDirection="column" marginTop={1}>
@@ -137,6 +155,16 @@ export const StaticCockpitPanel: React.FC = () => {
             </Box>
             <Text color={riskColor}>{riskLevel}</Text>
           </Box>
+          {deferredCount > 0 && (
+            <Box>
+              <Box width={12}>
+                <Text dimColor>Deferred:</Text>
+              </Box>
+              <Text color="yellow" bold>
+                {deferredCount}
+              </Text>
+            </Box>
+          )}
           {missionCouncil?.finalRoute.overallConfidence !== undefined && (
             <Box>
               <Box width={12}>

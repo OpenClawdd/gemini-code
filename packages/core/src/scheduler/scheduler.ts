@@ -10,6 +10,7 @@ import type { MessageBus } from '../confirmation-bus/message-bus.js';
 import { SchedulerStateManager } from './state-manager.js';
 import { resolveConfirmation } from './confirmation.js';
 import { checkPolicy, updatePolicy, getPolicyDenialError } from './policy.js';
+import { deferCommand } from '../policy/deferred-command-queue.js';
 import { evaluateBeforeToolHook } from './hook-utils.js';
 import { ToolExecutor } from './tool-executor.js';
 import { ToolModificationHandler } from './tool-modifier.js';
@@ -684,6 +685,26 @@ export class Scheduler {
           new Error(errorMessage),
           errorType,
         ),
+      );
+      return;
+    }
+
+    if (decision === PolicyDecision.DEFER) {
+      const command = String(toolCall.request.args['command'] || '');
+      deferCommand({
+        command,
+        reason: policyReason || 'Unattended mode deferral',
+        missionText: this.config.getPolicyEngine().getAutopilotMission(),
+      });
+
+      const message = `Command deferred by Autopilot: ${
+        policyReason || 'Needs approval.'
+      }. Continuing unattended work.`;
+
+      this.state.updateStatus(
+        callId,
+        CoreToolCallStatus.Success,
+        createSuccessResponse(toolCall.request, message),
       );
       return;
     }

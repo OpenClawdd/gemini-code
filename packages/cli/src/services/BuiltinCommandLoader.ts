@@ -20,6 +20,7 @@ import {
 } from '@google/gemini-cli-core';
 import { aboutCommand } from '../ui/commands/aboutCommand.js';
 import { agentsCommand } from '../ui/commands/agentsCommand.js';
+import { autopilotCommand } from '../ui/commands/autopilotCommand.js';
 import { authCommand } from '../ui/commands/authCommand.js';
 import { bugCommand } from '../ui/commands/bugCommand.js';
 import { bugMemoryCommand } from '../ui/commands/bugMemoryCommand.js';
@@ -31,6 +32,7 @@ import { cockpitCommand } from '../ui/commands/cockpitCommand.js';
 import { compressCommand } from '../ui/commands/compressCommand.js';
 import { copyCommand } from '../ui/commands/copyCommand.js';
 import { corgiCommand } from '../ui/commands/corgiCommand.js';
+import { deferredCommand } from '../ui/commands/deferredCommand.js';
 import { docsCommand } from '../ui/commands/docsCommand.js';
 import { exportSessionCommand } from '../ui/commands/exportSessionCommand.js';
 import { directoryCommand } from '../ui/commands/directoryCommand.js';
@@ -126,6 +128,7 @@ export class BuiltinCommandLoader implements ICommandLoader {
     const allDefinitions: Array<SlashCommand | null> = [
       aboutCommand,
       ...(this.config?.isAgentsEnabled() ? [agentsCommand] : []),
+      autopilotCommand,
       authCommand,
       bugCommand,
       bugMemoryCommand,
@@ -140,7 +143,9 @@ export class BuiltinCommandLoader implements ICommandLoader {
       compressCommand,
       copyCommand,
       corgiCommand,
+      deferredCommand,
       docsCommand,
+
       exportSessionCommand,
       directoryCommand,
       editorCommand,

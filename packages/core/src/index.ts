@@ -18,6 +18,8 @@ export * from './policy/types.js';
 export * from './policy/policy-engine.js';
 export * from './policy/autopilot-command-gate.js';
 export * from './policy/autopilot-event-history.js';
+export * from './policy/autopilot-state.js';
+export * from './policy/deferred-command-queue.js';
 export * from './policy/toml-loader.js';
 export * from './policy/config.js';
 export * from './policy/integrity.js';

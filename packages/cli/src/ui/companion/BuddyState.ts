@@ -122,6 +122,10 @@ function updateBuddyFromEvent(event: AutopilotEvent): void {
       mood = 'steady';
       message = 'Suppressed command ceremony.';
       break;
+    case 'defer':
+      mood = 'busy';
+      message = 'Deferred approval step. Continuing.';
+      break;
     case 'allow':
       mood = 'busy';
       message = `Running safe command: ${event.command}`;

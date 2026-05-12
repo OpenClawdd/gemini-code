@@ -12,6 +12,7 @@ export enum PolicyDecision {
   DENY = 'deny',
   ASK_USER = 'ask_user',
   SUPPRESS = 'suppress',
+  DEFER = 'defer',
 }
 
 /**

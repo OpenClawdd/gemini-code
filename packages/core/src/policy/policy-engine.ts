@@ -35,6 +35,7 @@ import {
   recordAutopilotEvent,
   type AutopilotEventDecision,
 } from './autopilot-event-history.js';
+import { getAutopilotMode } from './autopilot-state.js';
 import { debugLogger } from '../utils/debugLogger.js';
 import { isRecord } from '../utils/markdownUtils.js';
 import type { CheckerRunner } from '../safety/checker-runner.js';
@@ -337,6 +338,8 @@ export class PolicyEngine {
       missionText: this.autopilotMission,
     });
 
+    const isUnattended = getAutopilotMode() === 'unattended';
+
     switch (result.decision) {
       case AutopilotCommandDecision.ALLOW:
         return { decision: PolicyDecision.ALLOW, reason: result.reason };
@@ -345,6 +348,12 @@ export class PolicyEngine {
       case AutopilotCommandDecision.DENY:
         return { decision: PolicyDecision.DENY, reason: result.reason };
       case AutopilotCommandDecision.ASK:
+        if (isUnattended) {
+          return {
+            decision: PolicyDecision.DEFER,
+            reason: `Autopilot (unattended): ${result.reason}`,
+          };
+        }
         return undefined;
       default: {
         const _exhaustive: never = result.decision;

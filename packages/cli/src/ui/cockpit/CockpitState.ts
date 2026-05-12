@@ -8,6 +8,9 @@ import { useEffect, useState } from 'react';
 import {
   getAutopilotEvents,
   type AutopilotEvent,
+  getDeferredCount,
+  getDeferredCommands,
+  type DeferredCommand,
 } from '@google/gemini-cli-core';
 import {
   createMissionCouncilResult,
@@ -124,6 +127,11 @@ export function getCockpitState(): CockpitState {
   const recentEvents = allEvents.slice(0, 5);
   const latestEvent = allEvents.length > 0 ? allEvents[0] : undefined;
 
+  const deferredCount = getDeferredCount();
+  const recentDeferred = getDeferredCommands()
+    .filter((c) => c.status === 'deferred')
+    .slice(-3);
+
   return {
     visible: cockpitVisible,
     mission: currentMission ?? undefined,
@@ -133,6 +141,8 @@ export function getCockpitState(): CockpitState {
     detailsExpanded: cockpitDetailsExpanded,
     recentEvents: [...recentEvents],
     latestEvent,
+    deferredCount,
+    recentDeferred,
   };
 }
 
@@ -145,6 +155,8 @@ export interface CockpitState {
   detailsExpanded: boolean;
   recentEvents: AutopilotEvent[];
   latestEvent?: AutopilotEvent;
+  deferredCount: number;
+  recentDeferred: DeferredCommand[];
 }
 
 export function useCockpitState(): CockpitState {

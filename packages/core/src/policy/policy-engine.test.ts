@@ -10,6 +10,7 @@ import {
   getAutopilotEvents,
   clearAutopilotEvents,
 } from './autopilot-event-history.js';
+import { setAutopilotMode } from './autopilot-state.js';
 import {
   PolicyDecision,
   type PolicyRule,
@@ -247,6 +248,24 @@ describe('PolicyEngine', () => {
         decision: 'allow',
         missionText: 'test mission',
       });
+    });
+
+    it('should return DEFER for commands needing approval in unattended mode', async () => {
+      setAutopilotMode('unattended');
+      engine = new PolicyEngine({
+        autopilotMission: 'test mission',
+      });
+
+      // git status && git log is a compound command that needs approval (ASK)
+      const { decision } = await engine.check(
+        {
+          name: 'run_shell_command',
+          args: { command: 'git status && git log' },
+        },
+        undefined,
+      );
+
+      expect(decision).toBe(PolicyDecision.DEFER);
     });
 
     it('should match tool by name', async () => {
