@@ -24,6 +24,7 @@ export interface MissionCouncilResult {
   };
   finalRoute: {
     firstAction: string;
+    lanes: string[];
   };
 }
 
@@ -47,11 +48,10 @@ export function createMissionCouncilResult(
   const critic: MissionCouncilResult['critic'] = {
     potentialFlaws: [],
   };
-  const finalRoute: MissionCouncilResult['finalRoute'] = {
-    firstAction: 'Inspect likely files before editing',
-  };
 
   const normalizedRequest = request.toLowerCase();
+
+  const lanes = ['scout', 'surgeon', 'test-captain'];
 
   if (
     normalizedRequest.includes('without touching auth') ||
@@ -67,11 +67,34 @@ export function createMissionCouncilResult(
     riskOfficer.reasons = [
       'User explicitly said not to touch auth-related code.',
     ];
+    lanes.push('risk-officer');
+  }
+
+  if (
+    normalizedRequest.includes('refactor') ||
+    normalizedRequest.includes('redesign') ||
+    normalizedRequest.includes('architect')
+  ) {
+    lanes.push('architect');
+    architect.proposedStructure = ['Multi-phase structural refactor'];
+  }
+
+  if (
+    normalizedRequest.includes('ui') ||
+    normalizedRequest.includes('css') ||
+    normalizedRequest.includes('cockpit')
+  ) {
+    lanes.push('ux-voice');
   }
 
   if (normalizedRequest.includes('search')) {
     scout.contextNeeded.push('Identify which search system the user means');
   }
+
+  const finalRoute: MissionCouncilResult['finalRoute'] = {
+    firstAction: 'Inspect likely files before editing',
+    lanes: [...new Set(lanes)],
+  };
 
   return {
     scout,

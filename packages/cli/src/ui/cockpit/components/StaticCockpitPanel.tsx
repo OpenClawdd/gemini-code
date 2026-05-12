@@ -137,6 +137,16 @@ export const StaticCockpitPanel: React.FC = () => {
             </Box>
             <Text color={riskColor}>{riskLevel}</Text>
           </Box>
+          {missionCouncil?.finalRoute.lanes && (
+            <Box>
+              <Box width={12}>
+                <Text dimColor>Lanes:</Text>
+              </Box>
+              <Text color="cyan">
+                {missionCouncil.finalRoute.lanes.join(' · ')}
+              </Text>
+            </Box>
+          )}
           {nextAction && !latestEvent && (
             <Box>
               <Box width={12}>

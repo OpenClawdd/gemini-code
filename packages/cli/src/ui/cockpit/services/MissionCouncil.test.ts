@@ -38,4 +38,22 @@ describe('MissionCouncil', () => {
       'Identify which search system the user means',
     );
   });
+
+  it('should detect default lanes', () => {
+    const result = createMissionCouncilResult('simple task');
+    expect(result.finalRoute.lanes).toEqual([
+      'scout',
+      'surgeon',
+      'test-captain',
+    ]);
+  });
+
+  it('should detect specialized lanes', () => {
+    const result = createMissionCouncilResult(
+      'refactor the UI without touching auth',
+    );
+    expect(result.finalRoute.lanes).toContain('architect');
+    expect(result.finalRoute.lanes).toContain('ux-voice');
+    expect(result.finalRoute.lanes).toContain('risk-officer');
+  });
 });
