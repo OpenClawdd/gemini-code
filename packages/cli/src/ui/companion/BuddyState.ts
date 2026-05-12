@@ -25,6 +25,8 @@ const defaultState: BuddyState = {
 };
 
 let buddyState: BuddyState = { ...defaultState };
+let lastMessage = '';
+let lastEventId = '';
 const listeners = new Set<() => void>();
 
 function notifyBuddyListeners(): void {
@@ -46,6 +48,14 @@ export function setBuddyVisible(visible: boolean): void {
   notifyBuddyListeners();
 }
 
+export function setBuddyQuiet(quiet: boolean): void {
+  if (quiet) {
+    setBuddyStatus('steady', 'Standing by (quiet mode).');
+  } else {
+    setBuddyStatus('steady', 'Standing by.');
+  }
+}
+
 export function toggleBuddy(): boolean {
   setBuddyVisible(!buddyState.visible);
   return buddyState.visible;
@@ -62,6 +72,8 @@ export function setBuddyStatus(mood: BuddyMood, message: string): void {
 
 export function resetBuddyState(): void {
   buddyState = { ...defaultState };
+  lastMessage = '';
+  lastEventId = '';
   notifyBuddyListeners();
 }
 
@@ -90,24 +102,39 @@ export function useBuddyState(): BuddyState {
 }
 
 function updateBuddyFromEvent(event: AutopilotEvent): void {
+  // Dedupe based on ID
+  if (event.id === lastEventId) return;
+  lastEventId = event.id;
+
+  let message = '';
+  let mood: BuddyMood = 'steady';
+
   switch (event.decision) {
     case 'deny':
-      setBuddyStatus('blocked', 'Blocked risky command.');
+      mood = 'blocked';
+      message = `Blocked risky command: ${event.command}`;
       break;
     case 'ask':
-      setBuddyStatus('protective', 'Needs approval.');
+      mood = 'protective';
+      message = 'Command needs your approval.';
       break;
     case 'suppress':
-      setBuddyStatus('steady', 'Suppressed command ceremony.');
+      mood = 'steady';
+      message = 'Suppressed command ceremony.';
       break;
     case 'allow':
-      // Only update if not already busy/blocked
-      if (buddyState.mood === 'steady' || buddyState.mood === 'busy') {
-        setBuddyStatus('busy', `Running: ${event.command}`);
-      }
+      mood = 'busy';
+      message = `Running safe command: ${event.command}`;
       break;
     default:
-      // No specific reaction for other cases
-      break;
+      return;
   }
+
+  // Cooldown/Spam prevention: don't repeat exact same message if mood is steady/busy
+  if (message === lastMessage && (mood === 'steady' || mood === 'busy')) {
+    return;
+  }
+
+  lastMessage = message;
+  setBuddyStatus(mood, message);
 }

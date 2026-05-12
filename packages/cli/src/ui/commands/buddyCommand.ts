@@ -7,6 +7,7 @@
 import {
   getBuddyState,
   setBuddyVisible,
+  setBuddyQuiet,
   toggleBuddy,
 } from '../companion/BuddyState.js';
 import {
@@ -41,11 +42,20 @@ export const buddyCommand: SlashCommand = {
       };
     }
 
+    if (subcommand === 'quiet') {
+      setBuddyQuiet(true);
+      return {
+        type: 'message',
+        messageType: 'info',
+        content: 'Pollux is now in quiet mode.',
+      };
+    }
+
     if (subcommand && subcommand !== 'on') {
       return {
         type: 'message',
         messageType: 'error',
-        content: 'Usage: /buddy [on|off|status]',
+        content: 'Usage: /buddy [on|off|status|quiet]',
       };
     }
 

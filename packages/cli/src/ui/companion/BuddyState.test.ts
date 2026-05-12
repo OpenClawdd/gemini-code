@@ -10,6 +10,7 @@ import {
   resetBuddyState,
   setBuddyStatus,
   setBuddyVisible,
+  setBuddyQuiet,
   toggleBuddy,
 } from './BuddyState.js';
 
@@ -42,5 +43,10 @@ describe('BuddyState', () => {
       mood: 'protective',
       message: 'Skipped a broad command.',
     });
+  });
+
+  it('enters quiet mode', () => {
+    setBuddyQuiet(true);
+    expect(getBuddyState().message).toContain('quiet mode');
   });
 });
