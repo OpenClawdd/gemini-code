@@ -137,6 +137,22 @@ export const StaticCockpitPanel: React.FC = () => {
             </Box>
             <Text color={riskColor}>{riskLevel}</Text>
           </Box>
+          {missionCouncil?.finalRoute.overallConfidence !== undefined && (
+            <Box>
+              <Box width={12}>
+                <Text dimColor>Confidence:</Text>
+              </Box>
+              <Text
+                color={
+                  missionCouncil.finalRoute.overallConfidence > 0.8
+                    ? 'green'
+                    : 'yellow'
+                }
+              >
+                {Math.round(missionCouncil.finalRoute.overallConfidence * 100)}%
+              </Text>
+            </Box>
+          )}
           {missionCouncil?.finalRoute.lanes && (
             <Box>
               <Box width={12}>
