@@ -27,6 +27,7 @@ import {
 } from './types.js';
 import { ToolErrorType } from '../tools/tool-error.js';
 import { UPDATE_TOPIC_TOOL_NAME } from '../tools/tool-names.js';
+import { enqueueDeferredCommand } from '../policy/deferred-command-queue.js';
 import { PolicyDecision, type ApprovalMode } from '../policy/types.js';
 import {
   ToolConfirmationOutcome,
@@ -51,6 +52,11 @@ import {
 } from '../utils/events.js';
 import { GeminiCliOperation } from '../telemetry/constants.js';
 
+function getShellCommandArg(args: Record<string, unknown>): string {
+  const command = args['command'];
+  return typeof command === 'string' ? command : '<unknown command>';
+}
+
 interface SchedulerQueueItem {
   requests: ToolCallRequestInfo[];
   signal: AbortSignal;
@@ -67,6 +73,26 @@ export interface SchedulerOptions {
   parentCallId?: string;
   onWaitingForConfirmation?: (waiting: boolean) => void;
 }
+
+const createSuccessResponse = (
+  request: ToolCallRequestInfo,
+  message: string,
+): ToolCallResponseInfo => ({
+  callId: request.callId,
+  error: undefined,
+  responseParts: [
+    {
+      functionResponse: {
+        id: request.callId,
+        name: request.originalRequestName ?? request.name,
+        response: { output: message },
+      },
+    },
+  ],
+  resultDisplay: message,
+  errorType: undefined,
+  contentLength: message.length,
+});
 
 const createErrorResponse = (
   request: ToolCallRequestInfo,
@@ -627,14 +653,51 @@ export class Scheduler {
     }
 
     // 2. Policy & Security
-    const { decision: policyDecision, rule } = await checkPolicy(
-      toolCall,
-      this.config,
-      this.subagent,
-    );
+    const {
+      decision: policyDecision,
+      rule,
+      reason: policyReason,
+    } = await checkPolicy(toolCall, this.config, this.subagent);
     let decision = policyDecision;
     if (hookDecision === 'ask') {
       decision = PolicyDecision.ASK_USER;
+    }
+
+    if (decision === PolicyDecision.SUPPRESS) {
+      const message = `Command suppressed by Autopilot: ${
+        policyReason ?? 'Tiny docs-only mission does not need command ceremony.'
+      }`;
+
+      this.state.updateStatus(
+        callId,
+        CoreToolCallStatus.Success,
+        createSuccessResponse(toolCall.request, message),
+      );
+      return;
+    }
+
+    if (decision === PolicyDecision.DEFER) {
+      const reason =
+        policyReason ??
+        'Autopilot unattended defers permission-needed commands for review.';
+      const command = getShellCommandArg(toolCall.request.args);
+      const normalizedReason = reason.replace(/[.!?]+$/, '');
+      const mission = this.config.getPolicyEngine().getAutopilotMission();
+      enqueueDeferredCommand({
+        command,
+        reason,
+        toolName: toolCall.request.name,
+        callId,
+        mission,
+      });
+      const message = `Command deferred by Autopilot: ${normalizedReason}. It did not run. Continuing unattended work.`;
+
+      this.state.updateStatus(
+        callId,
+        CoreToolCallStatus.Success,
+        createSuccessResponse(toolCall.request, message),
+      );
+      return;
     }
 
     if (decision === PolicyDecision.DENY) {

@@ -1,4 +1,4 @@
-# Gemini CLI
+# gemini-code
 
 [![Gemini CLI CI](https://github.com/google-gemini/gemini-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/google-gemini/gemini-cli/actions/workflows/ci.yml)
 [![Gemini CLI E2E (Chained)](https://github.com/google-gemini/gemini-cli/actions/workflows/chained_e2e.yml/badge.svg)](https://github.com/google-gemini/gemini-cli/actions/workflows/chained_e2e.yml)
@@ -8,13 +8,47 @@
 
 ![Gemini CLI Screenshot](/docs/assets/gemini-screenshot.png)
 
-Gemini CLI is an open-source AI agent that brings the power of Gemini directly
-into your terminal. It provides lightweight access to Gemini, giving you the
-most direct path from your prompt to our model.
+gemini-code is a fork of Gemini CLI that turns the terminal agent into a
+mission-control coding cockpit. It is built on Gemini CLI, and it keeps that
+foundation visible: Gemini models, the existing tool system, MCP support, and
+terminal-first workflows remain the base.
 
-Learn all about Gemini CLI in our [documentation](https://geminicli.com/docs/).
+The difference is the cockpit layer. gemini-code adds mission briefs, compact
+status panels, command hygiene, a deferred-command queue, and a small companion
+surface so unattended work can stay useful without becoming reckless.
 
-## 🚀 Why Gemini CLI?
+Learn all about upstream Gemini CLI in the
+[documentation](https://geminicli.com/docs/).
+
+## gemini-code cockpit layer
+
+- **Mission Cockpit**: `/mission` creates a structured mission brief and
+  `/cockpit` opens a compact mission-control panel that can expand for details.
+- **Pollux**: `/buddy` toggles Pollux, currently a status companion for real
+  events and cockpit messages, not a full animated terminal pet yet.
+- **Autopilot Command Gate**: mission-aware command hygiene can allow safe local
+  inspection, suppress unneeded ritual commands, deny dangerous commands, and
+  defer approval-needed commands in unattended mode.
+- **Deferred Command Queue**: `/deferred list` and `/deferred clear` expose
+  commands that were intentionally not run while unattended.
+- **Safety-first unattended mode**: `/autopilot unattended` turns
+  approval-needed shell commands into deferred queue entries instead of opening
+  permission UI or executing them.
+- **Optional localhost dashboard**: `/localhost start` opens a localhost-only
+  dashboard on `127.0.0.1`; it is off by default and does not start with the
+  CLI.
+
+Honest v1.1 scope:
+
+- Model Council lanes are role lanes for structured analysis, not true
+  multi-model execution yet.
+- Subagents are bounded role definitions, not real parallel autonomous agents
+  yet.
+- Pollux is a status companion today; animation and pet mode are future work.
+- The goal is to make a sharper coding cockpit than stock terminal agents, not
+  to claim AGI or pretend the fork already beats every other coding tool.
+
+## 🚀 Why Gemini CLI as the base?
 
 - **🎯 Free tier**: 60 requests/min and 1,000 requests/day with personal Google
   account.
