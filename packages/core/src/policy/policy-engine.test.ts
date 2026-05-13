@@ -250,6 +250,44 @@ describe('PolicyEngine', () => {
       });
     });
 
+    it('should defer explicitly requested validation commands in unattended mode', async () => {
+      setAutopilotMode('unattended');
+      clearAutopilotEvents();
+      engine = new PolicyEngine({
+        autopilotMission: 'run validation tests',
+      });
+
+      const result = await engine.check(
+        { name: 'run_shell_command', args: { command: 'npm test' } },
+        undefined,
+      );
+
+      expect(result.decision).toBe(PolicyDecision.DEFER);
+      expect(result.reason).toContain('Validation was explicitly requested');
+
+      const events = getAutopilotEvents();
+      expect(events[0].decision).toBe('defer');
+    });
+
+    it('should still suppress ritual tests for docs-only missions in unattended mode', async () => {
+      setAutopilotMode('unattended');
+      clearAutopilotEvents();
+      engine = new PolicyEngine({
+        autopilotMission: 'fix README typo',
+      });
+
+      const result = await engine.check(
+        { name: 'run_shell_command', args: { command: 'npm test' } },
+        undefined,
+      );
+
+      expect(result.decision).toBe(PolicyDecision.SUPPRESS);
+      expect(result.reason).toContain('Tiny docs-only mission');
+
+      const events = getAutopilotEvents();
+      expect(events[0].decision).toBe('suppress');
+    });
+
     it('should return DEFER for commands needing approval in unattended mode', async () => {
       setAutopilotMode('unattended');
       engine = new PolicyEngine({

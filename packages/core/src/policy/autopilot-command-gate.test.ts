@@ -17,9 +17,56 @@ function decision(command: string): AutopilotCommandDecision {
 }
 
 describe('evaluateAutopilotCommand', () => {
-  it('suppresses broad ritual commands', () => {
-    expect(decision('npm run format')).toBe(AutopilotCommandDecision.SUPPRESS);
-    expect(decision('npm test')).toBe(AutopilotCommandDecision.SUPPRESS);
+  it('suppresses broad ritual commands for tiny docs-only missions', () => {
+    const docsMission = 'fix README typo';
+    expect(
+      evaluateAutopilotCommand({ mission: docsMission, command: 'npm test' })
+        .decision,
+    ).toBe(AutopilotCommandDecision.SUPPRESS);
+    expect(
+      evaluateAutopilotCommand({
+        mission: docsMission,
+        command: 'npm run format',
+      }).decision,
+    ).toBe(AutopilotCommandDecision.SUPPRESS);
+  });
+
+  it('asks for broad tests if the mission is not explicitly docs-only', () => {
+    const complexMission = 'implement new feature X';
+    expect(
+      evaluateAutopilotCommand({ mission: complexMission, command: 'npm test' })
+        .decision,
+    ).toBe(AutopilotCommandDecision.ASK);
+  });
+
+  it('asks for tests when explicitly requested by user', () => {
+    expect(
+      evaluateAutopilotCommand({
+        mission: 'run validation tests',
+        command: 'npm test',
+      }).decision,
+    ).toBe(AutopilotCommandDecision.ASK);
+    expect(
+      evaluateAutopilotCommand({
+        mission: 'verify Autopilot v2 with tests',
+        command: 'npm test',
+      }).decision,
+    ).toBe(AutopilotCommandDecision.ASK);
+    expect(
+      evaluateAutopilotCommand({
+        mission: 'fix typo and verify with test',
+        command: 'npm test',
+      }).decision,
+    ).toBe(AutopilotCommandDecision.ASK);
+  });
+
+  it('does not suppress narrow test commands requested by user', () => {
+    expect(
+      evaluateAutopilotCommand({
+        mission: 'run validation tests',
+        command: 'npm test -- src/foo.test.ts',
+      }).decision,
+    ).toBe(AutopilotCommandDecision.ASK);
   });
 
   it('suppresses protected-zone core diffs for a no-core mission', () => {

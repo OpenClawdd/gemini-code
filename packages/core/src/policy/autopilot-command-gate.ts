@@ -33,6 +33,33 @@ function normalize(value: string): string {
   return value.trim().replace(/\s+/g, ' ');
 }
 
+/**
+ * Checks if the mission explicitly requests validation or testing.
+ */
+function isExplicitValidationRequested(mission: string): boolean {
+  const normalized = mission.toLowerCase();
+  return (
+    /run\s+(?:validation\s+)?tests?/i.test(normalized) ||
+    /verify/i.test(normalized) ||
+    /with\s+(?:validation|tests?)/i.test(normalized) ||
+    /check\s+with/i.test(normalized) ||
+    /validation\s+tests?/i.test(normalized)
+  );
+}
+
+/**
+ * Checks if the mission is a tiny, low-risk task (docs or README only).
+ */
+function isTinyDocsOnlyMission(mission: string): boolean {
+  const normalized = mission.toLowerCase();
+  return (
+    /fix\s+.*typo/i.test(normalized) ||
+    /update\s+readme/i.test(normalized) ||
+    /docs?-only/i.test(normalized) ||
+    /no-code-change/i.test(normalized)
+  );
+}
+
 function missionProtectsCore(mission: string): boolean {
   const normalizedMission = mission.toLowerCase();
   return (
@@ -80,9 +107,25 @@ export function evaluateAutopilotCommand({
   }
 
   if (broadTestPatterns.some((pattern) => pattern.test(normalizedCommand))) {
+    if (isExplicitValidationRequested(mission)) {
+      return {
+        decision: AutopilotCommandDecision.ASK,
+        reason: 'Validation was explicitly requested by the user.',
+      };
+    }
+
+    if (isTinyDocsOnlyMission(mission)) {
+      return {
+        decision: AutopilotCommandDecision.SUPPRESS,
+        reason: 'Tiny docs-only mission does not need command ceremony.',
+      };
+    }
+
+    // Default to ASK for broad test commands if mission is not explicitly docs-only
     return {
-      decision: AutopilotCommandDecision.SUPPRESS,
-      reason: 'Tiny docs-only mission does not need command ceremony.',
+      decision: AutopilotCommandDecision.ASK,
+      reason:
+        'Broad test commands require permission unless the mission is explicitly docs-only.',
     };
   }
 
