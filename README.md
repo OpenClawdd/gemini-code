@@ -1,4 +1,4 @@
-# Gemini CLI
+# gemini-code
 
 [![Gemini CLI CI](https://github.com/google-gemini/gemini-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/google-gemini/gemini-cli/actions/workflows/ci.yml)
 [![Gemini CLI E2E (Chained)](https://github.com/google-gemini/gemini-cli/actions/workflows/chained_e2e.yml/badge.svg)](https://github.com/google-gemini/gemini-cli/actions/workflows/chained_e2e.yml)
@@ -8,13 +8,35 @@
 
 ![Gemini CLI Screenshot](/docs/assets/gemini-screenshot.png)
 
-Gemini CLI is an open-source AI agent that brings the power of Gemini directly
-into your terminal. It provides lightweight access to Gemini, giving you the
-most direct path from your prompt to our model.
+gemini-code is a fork of Gemini CLI that turns the terminal agent into a
+mission-control coding cockpit. It keeps the upstream foundation visible: Gemini
+models, the existing tool system, MCP support, and terminal-first workflows
+remain the base.
 
-Learn all about Gemini CLI in our [documentation](https://geminicli.com/docs/).
+The cockpit layer adds mission briefs, compact status panels, command hygiene, a
+deferred-command queue, Pollux companion status, and an optional localhost
+dashboard so unattended work can stay useful without becoming reckless.
 
-## 🚀 Why Gemini CLI?
+Learn all about upstream Gemini CLI in the
+[documentation](https://geminicli.com/docs/).
+
+## gemini-code cockpit layer
+
+- **Mission Cockpit**: `/mission` creates a structured mission brief and
+  `/cockpit` opens a compact mission-control panel.
+- **Pollux**: `/buddy` toggles a status companion for real events and cockpit
+  messages.
+- **Autopilot Command Gate**: mission-aware command hygiene can allow safe local
+  inspection, suppress unneeded ritual commands, deny dangerous commands, and
+  defer approval-needed commands in unattended mode.
+- **Deferred Command Queue**: `/deferred list`, `/deferred approve`,
+  `/deferred reject`, and `/deferred clear` expose commands that were
+  intentionally not run while unattended.
+- **Optional localhost dashboard**: `/localhost start` opens a localhost-only
+  dashboard on `127.0.0.1`; it is off by default and does not start with the
+  CLI.
+
+## 🚀 Why Gemini CLI as the base?
 
 - **🎯 Free tier**: 60 requests/min and 1,000 requests/day with personal Google
   account.
