@@ -4,33 +4,42 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { autopilotCommand } from './autopilotCommand.js';
 import { getAutopilotMode } from '@google/gemini-cli-core';
+import { type CommandContext } from './types.js';
+import { createMockCommandContext } from '../../test-utils/mockCommandContext.js';
 
 describe('autopilotCommand', () => {
-  const mockContext: unknown = {
-    services: {
-      agentContext: {
-        config: {},
-      },
-    },
-  };
+  let mockContext: CommandContext;
+
+  beforeEach(() => {
+    mockContext = createMockCommandContext();
+  });
 
   it('reports current status', async () => {
-    const result = await autopilotCommand.action(mockContext, 'status');
+    const result = await autopilotCommand.action?.(mockContext, 'status');
+    if (!result || typeof result === 'string' || result.type !== 'message') {
+      throw new Error('Expected message result');
+    }
     expect(result.type).toBe('message');
     expect(result.content).toContain('Autopilot Mode:');
   });
 
   it('sets unattended mode', async () => {
-    const result = await autopilotCommand.action(mockContext, 'unattended');
+    const result = await autopilotCommand.action?.(mockContext, 'unattended');
+    if (!result || typeof result === 'string' || result.type !== 'message') {
+      throw new Error('Expected message result');
+    }
     expect(result.content).toContain('UNATTENDED');
     expect(getAutopilotMode()).toBe('unattended');
   });
 
   it('sets normal mode', async () => {
-    const result = await autopilotCommand.action(mockContext, 'normal');
+    const result = await autopilotCommand.action?.(mockContext, 'normal');
+    if (!result || typeof result === 'string' || result.type !== 'message') {
+      throw new Error('Expected message result');
+    }
     expect(result.content).toContain('NORMAL');
     expect(getAutopilotMode()).toBe('normal');
   });

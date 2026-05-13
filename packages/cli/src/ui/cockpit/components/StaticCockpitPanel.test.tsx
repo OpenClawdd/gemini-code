@@ -14,6 +14,7 @@ import {
   setCockpitVisible,
   setCurrentPhase,
 } from '../CockpitState.js';
+import { setBuddyStatus } from '../../companion/BuddyState.js';
 
 describe('StaticCockpitPanel', () => {
   beforeEach(() => {
@@ -98,10 +99,11 @@ describe('StaticCockpitPanel', () => {
 
   it('should show Pollux in the compact header without expanding details', async () => {
     const { lastFrame, unmount, waitUntilReady } = await render(
-      <StaticCockpitPanel polluxMessage="Standing by." />,
+      <StaticCockpitPanel />,
     );
 
     await act(async () => {
+      setBuddyStatus('steady', 'Standing by.');
       activateCockpitMission('trim the cockpit');
     });
 

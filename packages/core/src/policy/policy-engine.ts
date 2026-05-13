@@ -331,14 +331,34 @@ export class PolicyEngine {
       command,
     });
 
+    const isUnattended = getAutopilotMode() === 'unattended';
+    let eventDecision: AutopilotEventDecision;
+
+    switch (result.decision) {
+      case AutopilotCommandDecision.ALLOW:
+        eventDecision = 'allow';
+        break;
+      case AutopilotCommandDecision.SUPPRESS:
+        eventDecision = 'suppress';
+        break;
+      case AutopilotCommandDecision.DENY:
+        eventDecision = 'deny';
+        break;
+      case AutopilotCommandDecision.ASK:
+        eventDecision = isUnattended ? 'defer' : 'ask';
+        break;
+      default: {
+        const _exhaustive: never = result.decision;
+        eventDecision = _exhaustive;
+      }
+    }
+
     recordAutopilotEvent({
       command,
-      decision: result.decision as AutopilotEventDecision,
+      decision: eventDecision,
       reason: result.reason,
       missionText: this.autopilotMission,
     });
-
-    const isUnattended = getAutopilotMode() === 'unattended';
 
     switch (result.decision) {
       case AutopilotCommandDecision.ALLOW:

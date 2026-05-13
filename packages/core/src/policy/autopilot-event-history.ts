@@ -6,7 +6,12 @@
 
 import { randomUUID } from 'node:crypto';
 
-export type AutopilotEventDecision = 'allow' | 'suppress' | 'ask' | 'deny';
+export type AutopilotEventDecision =
+  | 'allow'
+  | 'suppress'
+  | 'ask'
+  | 'deny'
+  | 'defer';
 
 export interface AutopilotEvent {
   id: string;
