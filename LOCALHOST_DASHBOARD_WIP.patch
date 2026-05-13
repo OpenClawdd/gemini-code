@@ -1,0 +1,1022 @@
+diff --git a/README.md b/README.md
+index 20813de3e..7554e107b 100644
+--- a/README.md
++++ b/README.md
+@@ -1,412 +1,64 @@
+-# Gemini CLI
++# gemini-code: a cockpit for safe autonomous coding
+ 
+-[![Gemini CLI CI](https://github.com/google-gemini/gemini-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/google-gemini/gemini-cli/actions/workflows/ci.yml)
+-[![Gemini CLI E2E (Chained)](https://github.com/google-gemini/gemini-cli/actions/workflows/chained_e2e.yml/badge.svg)](https://github.com/google-gemini/gemini-cli/actions/workflows/chained_e2e.yml)
+-[![Version](https://img.shields.io/npm/v/@google/gemini-cli)](https://www.npmjs.com/package/@google/gemini-cli)
+-[![License](https://img.shields.io/github/license/google-gemini/gemini-cli)](https://github.com/google-gemini/gemini-cli/blob/main/LICENSE)
+-[![View Code Wiki](https://assets.codewiki.google/readme-badge/static.svg)](https://codewiki.google/github.com/google-gemini/gemini-cli?utm_source=badge&utm_medium=github&utm_campaign=github.com/google-gemini/gemini-cli)
++**gemini-code** turns the terminal into a mission-control center for software engineering. It is designed for developers who want the speed of an autonomous agent with the safety and oversight of a flight deck.
+ 
+-![Gemini CLI Screenshot](/docs/assets/gemini-screenshot.png)
++## 🚀 Headline Features: Safe Autonomy
+ 
+-Gemini CLI is an open-source AI agent that brings the power of Gemini directly
+-into your terminal. It provides lightweight access to Gemini, giving you the
+-most direct path from your prompt to our model.
++### 🛡️ Autopilot Command Gate
++Never worry about an agent running a destructive command behind your back. The **Autopilot Gate** classifies every shell command before execution:
++- **Auto-Allow**: Simple read-only operations (status, logs, directory listing) run silently.
++- **Auto-Deny**: Dangerous operations (`rm -rf`, `sudo`, `git push`) are blocked by policy.
++- **Ask/Defer**: Everything else requires oversight.
+ 
+-Learn all about Gemini CLI in our [documentation](https://geminicli.com/docs/).
++### 📥 Deferred Command Queue (v3)
++Unattended modes (Shower, School, or Night mode) no longer stall. When a command requires approval, gemini-code **defers** it to a background queue and continues with other safe tasks. You can review and approve the entire queue once you're back.
+ 
+-## 🚀 Why Gemini CLI?
+-
+-- **🎯 Free tier**: 60 requests/min and 1,000 requests/day with personal Google
+-  account.
+-- **🧠 Powerful Gemini 3 models**: Access to improved reasoning and 1M token
+-  context window.
+-- **🔧 Built-in tools**: Google Search grounding, file operations, shell
+-  commands, web fetching.
+-- **🔌 Extensible**: MCP (Model Context Protocol) support for custom
+-  integrations.
+-- **💻 Terminal-first**: Designed for developers who live in the command line.
+-- **🛡️ Open source**: Apache 2.0 licensed.
+-
+-## 📦 Installation
+-
+-See
+-[Gemini CLI installation, execution, and releases](https://www.geminicli.com/docs/get-started/installation)
+-for recommended system specifications and a detailed installation guide.
+-
+-### Quick Install
+-
+-#### Run instantly with npx
+-
+-```bash
+-# Using npx (no installation required)
+-npx @google/gemini-cli
+-```
+-
+-#### Install globally with npm
+-
+-```bash
+-npm install -g @google/gemini-cli
+-```
+-
+-#### Install globally with Homebrew (macOS/Linux)
+-
+-```bash
+-brew install gemini-cli
+-```
+-
+-#### Install globally with MacPorts (macOS)
+-
+-```bash
+-sudo port install gemini-cli
+-```
+-
+-#### Install with Anaconda (for restricted environments)
+-
+-```bash
+-# Create and activate a new environment
+-conda create -y -n gemini_env -c conda-forge nodejs
+-conda activate gemini_env
+-
+-# Install Gemini CLI globally via npm (inside the environment)
+-npm install -g @google/gemini-cli
+-```
+-
+-## Release Channels
+-
+-See [Releases](https://www.geminicli.com/docs/changelogs) for more details.
+-
+-### Preview
+-
+-New preview releases will be published each week at UTC 23:59 on Tuesdays. These
+-releases will not have been fully vetted and may contain regressions or other
+-outstanding issues. Please help us test and install with `preview` tag.
+-
+-```bash
+-npm install -g @google/gemini-cli@preview
+-```
+-
+-### Stable
+-
+-- New stable releases will be published each week at UTC 20:00 on Tuesdays, this
+-  will be the full promotion of last week's `preview` release + any bug fixes
+-  and validations. Use `latest` tag.
+-
+-```bash
+-npm install -g @google/gemini-cli@latest
+-```
+-
+-### Nightly
+-
+-- New releases will be published each day at UTC 00:00. This will be all changes
+-  from the main branch as represented at time of release. It should be assumed
+-  there are pending validations and issues. Use `nightly` tag.
+-
+-```bash
+-npm install -g @google/gemini-cli@nightly
+-```
+-
+-## 📋 Key Features
+-
+-### Code Understanding & Generation
+-
+-- Query and edit large codebases
+-- Generate new apps from PDFs, images, or sketches using multimodal capabilities
+-- Debug issues and troubleshoot with natural language
+-
+-### Automation & Integration
+-
+-- Automate operational tasks like querying pull requests or handling complex
+-  rebases
+-- Use MCP servers to connect new capabilities, including
+-  [media generation with Imagen, Veo or Lyria](https://github.com/GoogleCloudPlatform/vertex-ai-creative-studio/tree/main/experiments/mcp-genmedia)
+-- Run non-interactively in scripts for workflow automation
+-
+-### Advanced Capabilities
+-
+-- Ground your queries with built-in
+-  [Google Search](https://ai.google.dev/gemini-api/docs/grounding) for real-time
+-  information
+-- Conversation checkpointing to save and resume complex sessions
+-- Custom context files (GEMINI.md) to tailor behavior for your projects
+-
+-### GitHub Integration
+-
+-Integrate Gemini CLI directly into your GitHub workflows with
+-[**Gemini CLI GitHub Action**](https://github.com/google-github-actions/run-gemini-cli):
+-
+-- **Pull Request Reviews**: Automated code review with contextual feedback and
+-  suggestions
+-- **Issue Triage**: Automated labeling and prioritization of GitHub issues based
+-  on content analysis
+-- **On-demand Assistance**: Mention `@gemini-cli` in issues and pull requests
+-  for help with debugging, explanations, or task delegation
+-- **Custom Workflows**: Build automated, scheduled and on-demand workflows
+-  tailored to your team's needs
+-
+-## 🔐 Authentication Options
+-
+-Choose the authentication method that best fits your needs:
+-
+-### Option 1: Sign in with Google (OAuth login using your Google Account)
+-
+-**✨ Best for:** Individual developers as well as anyone who has a Gemini Code
+-Assist License. (see
+-[quota limits and terms of service](https://cloud.google.com/gemini/docs/quotas)
+-for details)
+-
+-**Benefits:**
+-
+-- **Free tier**: 60 requests/min and 1,000 requests/day
+-- **Gemini 3 models** with 1M token context window
+-- **No API key management** - just sign in with your Google account
+-- **Automatic updates** to latest models
+-
+-#### Start Gemini CLI, then choose _Sign in with Google_ and follow the browser authentication flow when prompted
+-
+-```bash
+-gemini
+-```
+-
+-#### If you are using a paid Code Assist License from your organization, remember to set the Google Cloud Project
+-
+-```bash
+-# Set your Google Cloud Project
+-export GOOGLE_CLOUD_PROJECT="YOUR_PROJECT_ID"
+-gemini
+-```
+-
+-### Option 2: Gemini API Key
+-
+-**✨ Best for:** Developers who need specific model control or paid tier access
+-
+-**Benefits:**
+-
+-- **Free tier**: 1000 requests/day with Gemini 3 (mix of flash and pro)
+-- **Model selection**: Choose specific Gemini models
+-- **Usage-based billing**: Upgrade for higher limits when needed
+-
+-```bash
+-# Get your key from https://aistudio.google.com/apikey
+-export GEMINI_API_KEY="YOUR_API_KEY"
+-gemini
+-```
+-
+-### Option 3: Vertex AI
+-
+-**✨ Best for:** Enterprise teams and production workloads
+-
+-**Benefits:**
+-
+-- **Enterprise features**: Advanced security and compliance
+-- **Scalable**: Higher rate limits with billing account
+-- **Integration**: Works with existing Google Cloud infrastructure
+-
+-```bash
+-# Get your key from Google Cloud Console
+-export GOOGLE_API_KEY="YOUR_API_KEY"
+-export GOOGLE_GENAI_USE_VERTEXAI=true
+-gemini
+-```
+-
+-For Google Workspace accounts and other authentication methods, see the
+-[authentication guide](https://www.geminicli.com/docs/get-started/authentication).
+-
+-## 🚀 Getting Started
+-
+-### Basic Usage
+-
+-#### Start in current directory
+-
+-```bash
+-gemini
+-```
+-
+-#### Include multiple directories
+-
+-```bash
+-gemini --include-directories ../lib,../docs
+-```
+-
+-#### Use specific model
+-
+-```bash
+-gemini -m gemini-2.5-flash
+-```
+-
+-#### Non-interactive mode for scripts
+-
+-Get a simple text response:
+-
+-```bash
+-gemini -p "Explain the architecture of this codebase"
+-```
+-
+-For more advanced scripting, including how to parse JSON and handle errors, use
+-the `--output-format json` flag to get structured output:
+-
+-```bash
+-gemini -p "Explain the architecture of this codebase" --output-format json
+-```
+-
+-For real-time event streaming (useful for monitoring long-running operations),
+-use `--output-format stream-json` to get newline-delimited JSON events:
+-
+-```bash
+-gemini -p "Run tests and deploy" --output-format stream-json
+-```
+-
+-### Quick Examples
+-
+-#### Start a new project
+-
+-```bash
+-cd new-project/
+-gemini
+-> Write me a Discord bot that answers questions using a FAQ.md file I will provide
+-```
+-
+-#### Analyze existing code
+-
+-```bash
+-git clone https://github.com/google-gemini/gemini-cli
+-cd gemini-cli
+-gemini
+-> Give me a summary of all of the changes that went in yesterday
+-```
+-
+-## 📚 Documentation
+-
+-### Getting Started
+-
+-- [**Quickstart Guide**](https://www.geminicli.com/docs/get-started) - Get up
+-  and running quickly.
+-- [**Authentication Setup**](https://www.geminicli.com/docs/get-started/authentication) -
+-  Detailed auth configuration.
+-- [**Configuration Guide**](https://www.geminicli.com/docs/reference/configuration) -
+-  Settings and customization.
+-- [**Keyboard Shortcuts**](https://www.geminicli.com/docs/reference/keyboard-shortcuts) -
+-  Productivity tips.
+-
+-### Core Features
+-
+-- [**Commands Reference**](https://www.geminicli.com/docs/reference/commands) -
+-  All slash commands (`/help`, `/chat`, etc).
+-- [**Custom Commands**](https://www.geminicli.com/docs/cli/custom-commands) -
+-  Create your own reusable commands.
+-- [**Context Files (GEMINI.md)**](https://www.geminicli.com/docs/cli/gemini-md) -
+-  Provide persistent context to Gemini CLI.
+-- [**Checkpointing**](https://www.geminicli.com/docs/cli/checkpointing) - Save
+-  and resume conversations.
+-- [**Token Caching**](https://www.geminicli.com/docs/cli/token-caching) -
+-  Optimize token usage.
+-
+-### Tools & Extensions
+-
+-- [**Built-in Tools Overview**](https://www.geminicli.com/docs/reference/tools)
+-  - [File System Operations](https://www.geminicli.com/docs/tools/file-system)
+-  - [Shell Commands](https://www.geminicli.com/docs/tools/shell)
+-  - [Web Fetch & Search](https://www.geminicli.com/docs/tools/web-fetch)
+-- [**MCP Server Integration**](https://www.geminicli.com/docs/tools/mcp-server) -
+-  Extend with custom tools.
+-- [**Custom Extensions**](https://geminicli.com/docs/extensions/writing-extensions) -
+-  Build and share your own commands.
+-
+-### Advanced Topics
+-
+-- [**Headless Mode (Scripting)**](https://www.geminicli.com/docs/cli/headless) -
+-  Use Gemini CLI in automated workflows.
+-- [**IDE Integration**](https://www.geminicli.com/docs/ide-integration) - VS
+-  Code companion.
+-- [**Sandboxing & Security**](https://www.geminicli.com/docs/cli/sandbox) - Safe
+-  execution environments.
+-- [**Trusted Folders**](https://www.geminicli.com/docs/cli/trusted-folders) -
+-  Control execution policies by folder.
+-- [**Enterprise Guide**](https://www.geminicli.com/docs/cli/enterprise) - Deploy
+-  and manage in a corporate environment.
+-- [**Telemetry & Monitoring**](https://www.geminicli.com/docs/cli/telemetry) -
+-  Usage tracking.
+-- [**Tools reference**](https://www.geminicli.com/docs/reference/tools) -
+-  Built-in tools overview.
+-- [**Local development**](https://www.geminicli.com/docs/local-development) -
+-  Local development tooling.
+-
+-### Troubleshooting & Support
+-
+-- [**Troubleshooting Guide**](https://www.geminicli.com/docs/resources/troubleshooting) -
+-  Common issues and solutions.
+-- [**FAQ**](https://www.geminicli.com/docs/resources/faq) - Frequently asked
+-  questions.
+-- Use `/bug` command to report issues directly from the CLI.
+-
+-### Using MCP Servers
+-
+-Configure MCP servers in `~/.gemini/settings.json` to extend Gemini CLI with
+-custom tools:
+-
+-```text
+-> @github List my open pull requests
+-> @slack Send a summary of today's commits to #dev channel
+-> @database Run a query to find inactive users
+-```
+-
+-See the
+-[MCP Server Integration guide](https://www.geminicli.com/docs/tools/mcp-server)
+-for setup instructions.
+-
+-## 🤝 Contributing
+-
+-We welcome contributions! Gemini CLI is fully open source (Apache 2.0), and we
+-encourage the community to:
++---
+ 
+-- Report bugs and suggest features.
+-- Improve documentation.
+-- Submit code improvements.
+-- Share your MCP servers and extensions.
++## 🏗️ The Coding Cockpit
+ 
+-See our [Contributing Guide](./CONTRIBUTING.md) for development setup, coding
+-standards, and how to submit pull requests.
++gemini-code is a specialized shell and UI layer built on top of the open-source Gemini CLI. It evolves the standard chat interface into a high-fidelity workspace:
+ 
+-Check our [Official Roadmap](https://github.com/orgs/google-gemini/projects/11)
+-for planned features and priorities.
++- **Mission Control (`/mission`)**: Define structured coding goals. The agent generates a brief, identifies risks, and maps out "role lanes" before writing a single line of code.
++- **The Cockpit Overlay**: A real-time HUD (F10 to toggle) that surfaces the current phase, risk level, active subagent lanes, and recent autopilot history.
++- **Pollux (Buddy)**: A reactive companion that provides instant, low-noise feedback on autopilot decisions and mission progress.
++- **Subagent Registry**: Formalized roles (Scout, Architect, Surgeon, Test Captain) with strictly defined capabilities and zone boundaries.
++- **Nervous System**: A persistent event timeline that powers both the TUI and future dashboard mirrors.
+ 
+-## 📖 Resources
++## 🏛️ Model Council & Subagents (v1.1)
+ 
+-- **[Free Course](https://learn.deeplearning.ai/courses/gemini-cli-code-and-create-with-an-open-source-agent/information)** -
+-  Learn the basics.
+-- **[Official Roadmap](./ROADMAP.md)** - See what's coming next.
+-- **[Changelog](https://www.geminicli.com/docs/changelogs)** - See recent
+-  notable updates.
+-- **[NPM Package](https://www.npmjs.com/package/@google/gemini-cli)** - Package
+-  registry.
+-- **[GitHub Issues](https://github.com/google-gemini/gemini-cli/issues)** -
+-  Report bugs or request features.
+-- **[Security Advisories](https://github.com/google-gemini/gemini-cli/security/advisories)** -
+-  Security updates.
++gemini-code uses a **Role Lane** strategy to maximize model performance:
++- **Fast Scout**: Rapid codebase mapping and assumption validation.
++- **Deep Architect**: Structural design and system integrity.
++- **Code Surgeon**: Precise, surgical edits and bug fixes.
++- **Test Captain**: Correctness verification and regression prevention.
++- **Strict Critic**: Plan review and risk identification.
+ 
+-### Uninstall
++*Note: Model Council lanes are currenty role-based personas within the primary model loop, providing structured routing and transparency without the complexity of multi-model swarms.*
+ 
+-See the [Uninstall Guide](https://www.geminicli.com/docs/resources/uninstall)
+-for removal instructions.
++## 🛠️ Installation & Development
+ 
+-## 📄 Legal
++### Quick Start
++1. **Clone and Install**:
++   ```bash
++   git clone https://github.com/OpenClawdd/gemini-code.git
++   cd gemini-code
++   npm install
++   ```
++2. **Build and Run**:
++   ```bash
++   npm run build
++   npm run start # or use the 'gemini' alias if configured
++   ```
+ 
+-- **License**: [Apache License 2.0](LICENSE)
+-- **Terms of Service**:
+-  [Terms & Privacy](https://www.geminicli.com/docs/resources/tos-privacy)
+-- **Security**: [Security Policy](SECURITY.md)
++### Command Hygiene
++gemini-code encourages **Command Hygiene**. For maximum efficiency in Autopilot mode, the agent is steered to prefer separate simple commands over compound strings (&&, ||, pipes).
+ 
+-<p align="left">
+- <a href="https://www.star-history.com/google-gemini/gemini-cli">
+-  <picture>
+-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=google-gemini/gemini-cli&theme=dark" />
+-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=google-gemini/gemini-cli" />
+-   <img alt="Star History Rank" src="https://api.star-history.com/badge?repo=google-gemini/gemini-cli" />
+-  </picture>
+- </a>
+-</p>
++## 🛡️ Safety Principles
++1. **Do Useful Work**: Avoid fake chores and ritual "ceremony" commands.
++2. **Transparency First**: Every decision, risk, and plan is surfaced in the Cockpit.
++3. **No Silent Risks**: Dangerous commands are always blocked or deferred.
++4. **Bounded Roles**: Subagents cannot wander outside their assigned zones.
+ 
+ ---
+-
+-<p align="center">
+-  Built with ❤️ by Google and the open source community
+-</p>
++*gemini-code is an independent project extending the capabilities of the Gemini ecosystem.*
+diff --git a/packages/cli/src/services/BuiltinCommandLoader.ts b/packages/cli/src/services/BuiltinCommandLoader.ts
+index 789ac45e0..bf40f5f2b 100644
+--- a/packages/cli/src/services/BuiltinCommandLoader.ts
++++ b/packages/cli/src/services/BuiltinCommandLoader.ts
+@@ -70,6 +70,7 @@ import { terminalSetupCommand } from '../ui/commands/terminalSetupCommand.js';
+ import { upgradeCommand } from '../ui/commands/upgradeCommand.js';
+ import { gemmaStatusCommand } from '../ui/commands/gemmaStatusCommand.js';
+ import { voiceCommand } from '../ui/commands/voiceCommand.js';
++import { localhostCommand } from '../ui/commands/localhostCommand.js';
+ 
+ /**
+  * Loads the core, hard-coded slash commands that are an integral part
+@@ -243,6 +244,7 @@ export class BuiltinCommandLoader implements ICommandLoader {
+       vimCommand,
+       setupGithubCommand,
+       terminalSetupCommand,
++      localhostCommand,
+       ...(this.config?.isVoiceModeEnabled() ? [voiceCommand] : []),
+       ...(this.config?.getContentGeneratorConfig()?.authType ===
+       AuthType.LOGIN_WITH_GOOGLE
+diff --git a/packages/cli/src/ui/commands/localhostCommand.ts b/packages/cli/src/ui/commands/localhostCommand.ts
+new file mode 100644
+index 000000000..17455e26c
+--- /dev/null
++++ b/packages/cli/src/ui/commands/localhostCommand.ts
+@@ -0,0 +1,67 @@
++/**
++ * @license
++ * Copyright 2026 Google LLC
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++import {
++  CommandKind,
++  type SlashCommand,
++  type SlashCommandActionReturn,
++} from './types.js';
++import {
++  startDashboardServer,
++  stopDashboardServer,
++  getDashboardStatus,
++} from '../local-dashboard/DashboardServer.js';
++
++export const localhostCommand: SlashCommand = {
++  name: 'localhost',
++  description: 'Manage the read-only localhost cockpit dashboard.',
++  kind: CommandKind.BUILT_IN,
++  isSafeConcurrent: true,
++  action: async (_context, args): Promise<SlashCommandActionReturn> => {
++    const subCommand = args.trim().toLowerCase();
++
++    if (subCommand === 'on') {
++      try {
++        const message = await startDashboardServer();
++        return {
++          type: 'message',
++          messageType: 'info',
++          content: message,
++        };
++      } catch (err: unknown) {
++        const message = err instanceof Error ? err.message : String(err);
++        return {
++          type: 'message',
++          messageType: 'error',
++          content: `Failed to start dashboard: ${message}`,
++        };
++      }
++    }
++
++    if (subCommand === 'off') {
++      stopDashboardServer();
++      return {
++        type: 'message',
++        messageType: 'info',
++        content: 'Dashboard stopped.',
++      };
++    }
++
++    if (subCommand === 'status' || !subCommand) {
++      return {
++        type: 'message',
++        messageType: 'info',
++        content: `Dashboard status: ${getDashboardStatus()}`,
++      };
++    }
++
++    return {
++      type: 'message',
++      messageType: 'error',
++      content: 'Usage: /localhost [on|off|status]',
++    };
++  },
++};
+diff --git a/packages/cli/src/ui/components/Composer.tsx b/packages/cli/src/ui/components/Composer.tsx
+index 52bb2b294..6cfbb75ee 100644
+--- a/packages/cli/src/ui/components/Composer.tsx
++++ b/packages/cli/src/ui/components/Composer.tsx
+@@ -58,6 +58,17 @@ export const Composer = ({ isFocused = true }: { isFocused?: boolean }) => {
+ 
+   const { setShortcutsHelpVisible } = uiActions;
+ 
++  useEffect(() => {
++    const handleRemotePrompt = (text: string) => {
++      void uiActions.handleFinalSubmit(text);
++    };
++
++    appEvents.on(AppEvent.RemotePrompt, handleRemotePrompt);
++    return () => {
++      appEvents.off(AppEvent.RemotePrompt, handleRemotePrompt);
++    };
++  }, [uiActions]);
++
+   useEffect(() => {
+     if (hasPendingActionRequired) {
+       appEvents.emit(AppEvent.ScrollToBottom);
+diff --git a/packages/cli/src/ui/layouts/DefaultAppLayout.tsx b/packages/cli/src/ui/layouts/DefaultAppLayout.tsx
+index 5f46efcb5..fe948216e 100644
+--- a/packages/cli/src/ui/layouts/DefaultAppLayout.tsx
++++ b/packages/cli/src/ui/layouts/DefaultAppLayout.tsx
+@@ -57,11 +57,7 @@ export const DefaultAppLayout: React.FC = () => {
+       flexGrow={0}
+       ref={uiState.rootUiRef}
+     >
+-      {isCockpitVisible && (
+-        <StaticCockpitPanel
+-          polluxMessage={buddy.visible ? buddy.message : undefined}
+-        />
+-      )}
++      {isCockpitVisible && <StaticCockpitPanel />}
+       {!isCockpitVisible && buddy.visible && <BuddyPanel />}
+ 
+       <MainContent />
+diff --git a/packages/cli/src/ui/local-dashboard/DashboardServer.test.ts b/packages/cli/src/ui/local-dashboard/DashboardServer.test.ts
+new file mode 100644
+index 000000000..2502cf766
+--- /dev/null
++++ b/packages/cli/src/ui/local-dashboard/DashboardServer.test.ts
+@@ -0,0 +1,32 @@
++/**
++ * @license
++ * Copyright 2026 Google LLC
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++import { describe, it, expect, afterEach } from 'vitest';
++import {
++  startDashboardServer,
++  stopDashboardServer,
++  getDashboardStatus,
++} from './DashboardServer.js';
++
++describe('DashboardServer', () => {
++  afterEach(() => {
++    stopDashboardServer();
++  });
++
++  it('starts and stops the server', async () => {
++    const message = await startDashboardServer();
++    expect(message).toContain('Dashboard started');
++    expect(getDashboardStatus()).toContain('Running at http://127.0.0.1');
++
++    stopDashboardServer();
++    expect(getDashboardStatus()).toBe('Stopped');
++  });
++
++  it('only binds to 127.0.0.1', async () => {
++    await startDashboardServer();
++    expect(getDashboardStatus()).toContain('127.0.0.1');
++  });
++});
+diff --git a/packages/cli/src/ui/local-dashboard/DashboardServer.ts b/packages/cli/src/ui/local-dashboard/DashboardServer.ts
+new file mode 100644
+index 000000000..181346a7b
+--- /dev/null
++++ b/packages/cli/src/ui/local-dashboard/DashboardServer.ts
+@@ -0,0 +1,362 @@
++/**
++ * @license
++ * Copyright 2026 Google LLC
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++import http from 'node:http';
++import { getBuddyState } from '../companion/BuddyState.js';
++import { getCockpitState } from '../cockpit/CockpitState.js';
++import {
++  getAutopilotEvents,
++  getAutopilotMode,
++  setAutopilotMode,
++  updateDeferredStatus,
++} from '@google/gemini-cli-core';
++import { appEvents, AppEvent } from '../../utils/events.js';
++
++let server: http.Server | null = null;
++const PORT = 3000;
++const HOST = '127.0.0.1';
++
++export function startDashboardServer(): Promise<string> {
++  if (server) {
++    return Promise.resolve(
++      `Dashboard already running at http://${HOST}:${PORT}`,
++    );
++  }
++
++  server = http.createServer((req, res) => {
++    // 1. GET /api/state
++    if (req.url === '/api/state' && req.method === 'GET') {
++      const state = {
++        cockpit: getCockpitState(),
++        buddy: getBuddyState(),
++        events: getAutopilotEvents(),
++        autopilotMode: getAutopilotMode(),
++      };
++      res.writeHead(200, {
++        'Content-Type': 'application/json',
++        'Access-Control-Allow-Origin': '*',
++      });
++      res.end(JSON.stringify(state));
++      return;
++    }
++
++    // 2. POST /api/prompt
++    if (req.url === '/api/prompt' && req.method === 'POST') {
++      let body = '';
++      req.on('data', (chunk) => {
++        body += chunk.toString();
++      });
++      req.on('end', () => {
++        try {
++          const { text } = JSON.parse(body);
++          if (text) {
++            appEvents.emit(AppEvent.RemotePrompt, text);
++            res.writeHead(200, { 'Content-Type': 'application/json' });
++            res.end(JSON.stringify({ status: 'injected' }));
++          } else {
++            res.writeHead(400);
++            res.end('Missing text');
++          }
++        } catch (e) {
++          res.writeHead(400);
++          res.end('Invalid JSON');
++        }
++      });
++      return;
++    }
++
++    // 3. POST /api/deferred/:id/approve
++    const approveMatch = req.url?.match(/^\/api\/deferred\/(.+)\/approve$/);
++    if (approveMatch && req.method === 'POST') {
++      const id = approveMatch[1];
++      updateDeferredStatus(id, 'approved');
++      res.writeHead(200);
++      res.end(JSON.stringify({ status: 'approved' }));
++      return;
++    }
++
++    // 4. POST /api/deferred/:id/reject
++    const rejectMatch = req.url?.match(/^\/api\/deferred\/(.+)\/reject$/);
++    if (rejectMatch && req.method === 'POST') {
++      const id = rejectMatch[1];
++      updateDeferredStatus(id, 'rejected');
++      res.writeHead(200);
++      res.end(JSON.stringify({ status: 'rejected' }));
++      return;
++    }
++
++    // 5. POST /api/autopilot/mode
++    if (req.url === '/api/autopilot/mode' && req.method === 'POST') {
++      let body = '';
++      req.on('data', (chunk) => {
++        body += chunk.toString();
++      });
++      req.on('end', () => {
++        const { mode } = JSON.parse(body);
++        if (mode === 'normal' || mode === 'unattended') {
++          setAutopilotMode(mode);
++          res.writeHead(200);
++          res.end(JSON.stringify({ status: 'updated', mode }));
++        } else {
++          res.writeHead(400);
++          res.end('Invalid mode');
++        }
++      });
++      return;
++    }
++
++    // 6. Static HTML
++    if (req.url === '/' || req.url === '/index.html') {
++      res.writeHead(200, { 'Content-Type': 'text/html' });
++      res.end(renderDashboardHtml());
++      return;
++    }
++
++    // Handle CORS preflight
++    if (req.method === 'OPTIONS') {
++      res.writeHead(204, {
++        'Access-Control-Allow-Origin': '*',
++        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
++        'Access-Control-Allow-Headers': 'Content-Type',
++      });
++      res.end();
++      return;
++    }
++
++    res.writeHead(404);
++    res.end();
++  });
++
++  return new Promise((resolve, reject) => {
++    server?.listen(PORT, HOST, () => {
++      resolve(`Dashboard started at http://${HOST}:${PORT}`);
++    });
++    server?.on('error', (err) => {
++      reject(err);
++    });
++  });
++}
++
++export function stopDashboardServer(): void {
++  if (server) {
++    server.close();
++    server = null;
++  }
++}
++
++export function getDashboardStatus(): string {
++  return server ? `Running at http://${HOST}:${PORT}` : 'Stopped';
++}
++
++function renderDashboardHtml(): string {
++  return `
++<!DOCTYPE html>
++<html lang="en">
++<head>
++    <meta charset="UTF-8">
++    <meta name="viewport" content="width=device-width, initial-scale=1.0">
++    <title>gemini-code Flight Deck</title>
++    <style>
++        :root {
++            --bg: #0d1117;
++            --card-bg: rgba(22, 27, 34, 0.8);
++            --text: #c9d1d9;
++            --dim: #8b949e;
++            --cyan: #58a6ff;
++            --magenta: #bc8cff;
++            --green: #3fb950;
++            --yellow: #d29922;
++            --red: #f85149;
++            --border: rgba(255, 255, 255, 0.1);
++        }
++        body {
++            background-color: var(--bg);
++            color: var(--text);
++            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
++            margin: 0;
++            padding: 16px;
++            display: flex;
++            flex-direction: column;
++            align-items: center;
++        }
++        .container {
++            width: 100%;
++            max-width: 600px;
++        }
++        .card {
++            background: var(--card-bg);
++            backdrop-filter: blur(12px);
++            -webkit-backdrop-filter: blur(12px);
++            border: 1px solid var(--border);
++            border-radius: 16px;
++            padding: 20px;
++            margin-bottom: 16px;
++            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
++        }
++        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
++        h1 { font-size: 1.2rem; color: var(--cyan); margin: 0; letter-spacing: 1px; }
++        .mode-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; background: rgba(88, 166, 255, 0.1); color: var(--cyan); border: 1px solid var(--cyan); }
++        .mode-unattended { background: rgba(188, 140, 255, 0.1); color: var(--magenta); border-color: var(--magenta); }
++        
++        .label { color: var(--dim); font-size: 0.75rem; text-transform: uppercase; margin-bottom: 6px; font-weight: 600; }
++        .value { font-size: 1.1rem; margin-bottom: 16px; }
++        .phase-badge { color: var(--green); border: 1px solid var(--green); padding: 2px 8px; border-radius: 4px; font-size: 0.9rem; }
++        
++        .buddy-box { border-left: 4px solid var(--magenta); padding-left: 12px; font-style: italic; color: var(--magenta); }
++
++        .deferred-item { border: 1px solid var(--yellow); border-radius: 8px; padding: 12px; margin-bottom: 12px; background: rgba(210, 153, 34, 0.05); }
++        .deferred-cmd { font-family: monospace; font-size: 0.9rem; margin-bottom: 8px; word-break: break-all; }
++        .actions { display: flex; gap: 12px; }
++        .btn { flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; transition: opacity 0.2s; }
++        .btn:active { opacity: 0.7; }
++        .btn-approve { background: var(--green); color: white; }
++        .btn-reject { background: var(--red); color: white; }
++        
++        .timeline { margin-top: 20px; }
++        .event { display: flex; font-size: 0.85rem; margin-bottom: 10px; font-family: monospace; align-items: flex-start; }
++        .event-decision { width: 85px; font-weight: bold; flex-shrink: 0; }
++        .event-cmd { color: var(--dim); }
++        .allow { color: var(--green); }
++        .deny { color: var(--red); }
++        .ask { color: var(--yellow); }
++        .suppress { color: var(--dim); }
++
++        .composer { position: sticky; bottom: 16px; width: 100%; display: flex; gap: 8px; }
++        .composer input { flex: 1; background: #161b22; border: 1px solid var(--border); border-radius: 24px; padding: 12px 20px; color: white; outline: none; }
++        .composer button { background: var(--cyan); color: white; border: none; border-radius: 50%; width: 44px; height: 44px; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
++    </style>
++</head>
++<body>
++    <div class="container">
++        <div class="card">
++            <div class="header">
++                <h1>GC COCKPIT</h1>
++                <div id="mode-badge" class="mode-badge" onclick="toggleMode()">NORMAL</div>
++            </div>
++            <div class="label">Mission</div>
++            <div id="mission-goal" class="value">No active mission</div>
++            <div class="label">Status</div>
++            <div class="value"><span id="current-phase" class="phase-badge">INSPECT</span></div>
++        </div>
++
++        <div id="buddy-card" class="card">
++            <div class="label">Pollux (Buddy)</div>
++            <div id="buddy-message" class="buddy-box">Standing by.</div>
++        </div>
++
++        <div id="deferred-section" style="display: none;">
++            <div class="label">Deferred Queue</div>
++            <div id="deferred-list"></div>
++        </div>
++
++        <div class="card">
++            <div class="label">Activity Timeline</div>
++            <div id="events-list" class="timeline"></div>
++        </div>
++
++        <div class="composer">
++            <input type="text" id="prompt-input" placeholder="Steer the agent..." onkeypress="handleKey(event)">
++            <button onclick="sendPrompt()">→</button>
++        </div>
++    </div>
++
++    <script>
++        let currentMode = 'normal';
++
++        async function update() {
++            try {
++                const res = await fetch('/api/state');
++                const data = await res.json();
++                
++                document.getElementById('mission-goal').textContent = data.cockpit.missionBrief?.goal || 'No active mission';
++                document.getElementById('current-phase').textContent = data.cockpit.phase;
++                document.getElementById('buddy-message').textContent = data.buddy.message;
++                
++                currentMode = data.autopilotMode;
++                const badge = document.getElementById('mode-badge');
++                badge.textContent = currentMode.toUpperCase();
++                badge.className = 'mode-badge' + (currentMode === 'unattended' ? ' mode-unattended' : '');
++
++                const deferred = data.cockpit.recentDeferred || [];
++                const defSection = document.getElementById('deferred-section');
++                const defList = document.getElementById('deferred-list');
++                
++                if (deferred.length > 0) {
++                    defSection.style.display = 'block';
++                    defList.innerHTML = '';
++                    deferred.forEach(item => {
++                        const div = document.createElement('div');
++                        div.className = 'deferred-item';
++                        div.innerHTML = \`
++                            <div class="deferred-cmd">\${item.command}</div>
++                            <div class="label" style="font-size: 0.65rem">Reason: \${item.reason}</div>
++                            <div class="actions">
++                                <button class="btn btn-approve" onclick="approve('\${item.id}')">APPROVE</button>
++                                <button class="btn btn-reject" onclick="reject('\${item.id}')">REJECT</button>
++                            </div>
++                        \`;
++                        defList.appendChild(div);
++                    });
++                } else {
++                    defSection.style.display = 'none';
++                }
++
++                const events = data.events || [];
++                const list = document.getElementById('events-list');
++                list.innerHTML = '';
++                events.slice(0, 10).forEach(ev => {
++                    const div = document.createElement('div');
++                    div.className = 'event';
++                    div.innerHTML = \`<span class="event-decision \${ev.decision}">[\${ev.decision.toUpperCase()}]</span> <span class="event-cmd">\${ev.command}</span>\`;
++                    list.appendChild(div);
++                });
++            } catch (e) {
++                console.error('Update failed', e);
++            }
++        }
++
++        async function toggleMode() {
++            const nextMode = currentMode === 'normal' ? 'unattended' : 'normal';
++            await fetch('/api/autopilot/mode', {
++                method: 'POST',
++                headers: { 'Content-Type': 'application/json' },
++                body: JSON.stringify({ mode: nextMode })
++            });
++            update();
++        }
++
++        async function approve(id) {
++            await fetch(\`/api/deferred/\${id}/approve\`, { method: 'POST' });
++            update();
++        }
++
++        async function reject(id) {
++            await fetch(\`/api/deferred/\${id}/reject\`, { method: 'POST' });
++            update();
++        }
++
++        async function sendPrompt() {
++            const input = document.getElementById('prompt-input');
++            const text = input.value.trim();
++            if (!text) return;
++            
++            input.value = '';
++            await fetch('/api/prompt', {
++                method: 'POST',
++                headers: { 'Content-Type': 'application/json' },
++                body: JSON.stringify({ text })
++            });
++        }
++
++        function handleKey(e) { if (e.key === 'Enter') sendPrompt(); }
++
++        setInterval(update, 2000);
++        update();
++    </script>
++</body>
++</html>
++`;
++}
+diff --git a/packages/cli/src/utils/events.ts b/packages/cli/src/utils/events.ts
+index 9c3ec6a36..9fe97a863 100644
+--- a/packages/cli/src/utils/events.ts
++++ b/packages/cli/src/utils/events.ts
+@@ -24,6 +24,7 @@ export enum AppEvent {
+   TerminalBackground = 'terminal-background',
+   TransientMessage = 'transient-message',
+   ScrollToBottom = 'scroll-to-bottom',
++  RemotePrompt = 'remote-prompt',
+ }
+ 
+ export interface AppEvents {
+@@ -34,6 +35,7 @@ export interface AppEvents {
+   [AppEvent.TerminalBackground]: [string];
+   [AppEvent.TransientMessage]: [TransientMessagePayload];
+   [AppEvent.ScrollToBottom]: never[];
++  [AppEvent.RemotePrompt]: [string];
+ }
+ 
+ export const appEvents = new EventEmitter<AppEvents>();
