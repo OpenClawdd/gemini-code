@@ -28,8 +28,11 @@ gemini-code adds the product soul:
 - MissionCouncil
 - CouncilPanel
 - No Ritual Nags policy
-- future Permission Autopilot
-- future Buddy / Pollux
+- Permission Autopilot
+- Deferred Command Queue
+- Pollux status companion
+- optional localhost dashboard
+- future Pollux terminal pet mode
 - future Test Planner
 - future Diff Safety
 - future Project Profiles
@@ -205,11 +208,12 @@ Only recommend commit when:
 
 ## Permission Autopilot Law
 
-Future Permission Autopilot should classify actions as:
+Permission Autopilot should classify shell actions as:
 
 - Allow
 - Ask
 - Deny
+- Defer
 
 Allow:
 
@@ -227,6 +231,14 @@ Ask:
 - broad tests
 - commits
 - multi-file rewrites
+
+Defer:
+
+- approval-needed commands in unattended mode
+- user-requested validation when unattended
+- commands that should be reviewed later instead of opening permission UI
+
+Deferred commands must not execute until the user deliberately handles them.
 
 Deny:
 

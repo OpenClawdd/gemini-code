@@ -68,7 +68,11 @@ describe('deferredCommand', () => {
 
   it('clears the queue', async () => {
     deferCommand({ command: 'ls', reason: 'test' });
-    await deferredCommand.action?.(mockContext, 'clear');
+    const result = await deferredCommand.action?.(mockContext, 'clear');
+    if (!result || typeof result === 'string' || result.type !== 'message') {
+      throw new Error('Expected message result');
+    }
     expect(getDeferredCommands()).toHaveLength(0);
+    expect(result.content).toBe('Deferred command queue cleared.');
   });
 });

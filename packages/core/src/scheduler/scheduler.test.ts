@@ -49,6 +49,10 @@ import { resolveConfirmation } from './confirmation.js';
 import { checkPolicy, updatePolicy } from './policy.js';
 import { ToolExecutor } from './tool-executor.js';
 import { ToolModificationHandler } from './tool-modifier.js';
+import {
+  clearDeferredCommands,
+  getDeferredCommands,
+} from '../policy/deferred-command-queue.js';
 import { MessageBusType, type Message } from '../confirmation-bus/types.js';
 
 vi.mock('./state-manager.js');
@@ -161,6 +165,7 @@ describe('Scheduler (Orchestrator)', () => {
     // --- Setup Injected Mocks ---
     mockPolicyEngine = {
       check: vi.fn().mockResolvedValue({ decision: PolicyDecision.ALLOW }),
+      getAutopilotMission: vi.fn().mockReturnValue('test mission'),
     } as unknown as Mocked<PolicyEngine>;
 
     mockToolRegistry = {
@@ -269,6 +274,7 @@ describe('Scheduler (Orchestrator)', () => {
       rule: undefined,
     });
     vi.mocked(updatePolicy).mockReset();
+    clearDeferredCommands();
 
     mockExecutor = {
       execute: vi.fn(),
@@ -876,6 +882,42 @@ describe('Scheduler (Orchestrator)', () => {
         CoreToolCallStatus.Executing,
       );
       expect(mockExecutor.execute).toHaveBeenCalled();
+    });
+
+    it('should defer without confirmation or execution if Policy returns DEFER', async () => {
+      vi.mocked(checkPolicy).mockResolvedValue({
+        decision: PolicyDecision.DEFER,
+        rule: undefined,
+        reason: 'Autopilot unattended: needs approval.',
+      });
+
+      const shellRequest: ToolCallRequestInfo = {
+        ...req1,
+        name: 'run_shell_command',
+        args: { command: 'npm test' },
+      };
+
+      await scheduler.schedule(shellRequest, signal);
+
+      expect(resolveConfirmation).not.toHaveBeenCalled();
+      expect(mockExecutor.execute).not.toHaveBeenCalled();
+      expect(getDeferredCommands()).toEqual([
+        expect.objectContaining({
+          command: 'npm test',
+          reason: 'Autopilot unattended: needs approval.',
+          missionText: 'test mission',
+          status: 'deferred',
+        }),
+      ]);
+      expect(mockStateManager.updateStatus).toHaveBeenCalledWith(
+        'call-1',
+        CoreToolCallStatus.Success,
+        expect.objectContaining({
+          resultDisplay: expect.stringContaining(
+            'Command deferred by Autopilot',
+          ),
+        }),
+      );
     });
 
     it('should auto-approve remaining identical tools in batch after ProceedAlways', async () => {
