@@ -143,7 +143,7 @@ class RecursiveFileSearch implements FileSearch {
   constructor(private readonly options: FileSearchOptions) {}
 
   async initialize(): Promise<void> {
-    this.ignore = loadIgnoreRules(
+    this.ignore = await loadIgnoreRules(
       this.options.fileDiscoveryService,
       this.options.ignoreDirs,
     );
@@ -364,7 +364,7 @@ class DirectoryFileSearch implements FileSearch {
   constructor(private readonly options: FileSearchOptions) {}
 
   async initialize(): Promise<void> {
-    this.ignore = loadIgnoreRules(
+    this.ignore = await loadIgnoreRules(
       this.options.fileDiscoveryService,
       this.options.ignoreDirs,
     );

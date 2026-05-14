@@ -34,7 +34,7 @@ describe('crawler', () => {
       respectGitIgnore: false,
       respectGeminiIgnore: true,
     });
-    const ignore = loadIgnoreRules(service, []);
+    const ignore = await loadIgnoreRules(service, []);
 
     const results = await crawl({
       crawlDirectory: tmpDir,
@@ -68,7 +68,7 @@ describe('crawler', () => {
       respectGitIgnore: true,
       respectGeminiIgnore: true,
     });
-    const ignore = loadIgnoreRules(service, []);
+    const ignore = await loadIgnoreRules(service, []);
 
     const results = await crawl({
       crawlDirectory: tmpDir,
@@ -99,7 +99,7 @@ describe('crawler', () => {
       respectGitIgnore: false,
       respectGeminiIgnore: false,
     });
-    const ignore = loadIgnoreRules(service, ['logs']);
+    const ignore = await loadIgnoreRules(service, ['logs']);
 
     const results = await crawl({
       crawlDirectory: tmpDir,
@@ -131,7 +131,7 @@ describe('crawler', () => {
       respectGitIgnore: true,
       respectGeminiIgnore: false,
     });
-    const ignore = loadIgnoreRules(service, []);
+    const ignore = await loadIgnoreRules(service, []);
 
     const results = await crawl({
       crawlDirectory: tmpDir,
@@ -166,7 +166,7 @@ describe('crawler', () => {
       respectGitIgnore: true,
       respectGeminiIgnore: false,
     });
-    const ignore = loadIgnoreRules(service, []);
+    const ignore = await loadIgnoreRules(service, []);
 
     const results = await crawl({
       crawlDirectory: tmpDir,
@@ -204,7 +204,7 @@ describe('crawler', () => {
       respectGitIgnore: true,
       respectGeminiIgnore: false,
     });
-    const ignore = loadIgnoreRules(service, []);
+    const ignore = await loadIgnoreRules(service, []);
 
     const results = await crawl({
       crawlDirectory: tmpDir,
@@ -238,7 +238,7 @@ describe('crawler', () => {
       respectGitIgnore: true,
       respectGeminiIgnore: false,
     });
-    const ignore = loadIgnoreRules(service, []);
+    const ignore = await loadIgnoreRules(service, []);
 
     const results = await crawl({
       crawlDirectory: tmpDir,
@@ -269,7 +269,7 @@ describe('crawler', () => {
       respectGitIgnore: true,
       respectGeminiIgnore: true,
     });
-    const ignore = loadIgnoreRules(service, []);
+    const ignore = await loadIgnoreRules(service, []);
 
     const results = await crawl({
       crawlDirectory: tmpDir,
@@ -294,7 +294,7 @@ describe('crawler', () => {
       respectGitIgnore: true,
       respectGeminiIgnore: false,
     });
-    const ignore = loadIgnoreRules(service, []);
+    const ignore = await loadIgnoreRules(service, []);
 
     const results = await crawl({
       crawlDirectory: tmpDir,
@@ -319,7 +319,7 @@ describe('crawler', () => {
       respectGitIgnore: false,
       respectGeminiIgnore: false,
     });
-    const ignore = loadIgnoreRules(service, []);
+    const ignore = await loadIgnoreRules(service, []);
 
     const results = await crawl({
       crawlDirectory: tmpDir,
@@ -350,7 +350,7 @@ describe('crawler', () => {
         respectGitIgnore: false,
         respectGeminiIgnore: false,
       });
-      const ignore = loadIgnoreRules(service, []);
+      const ignore = await loadIgnoreRules(service, []);
       const options = {
         crawlDirectory: tmpDir,
         cwd: tmpDir,
@@ -383,8 +383,8 @@ describe('crawler', () => {
         'a.txt': '',
         'b.txt': '',
       });
-      const getIgnore = () =>
-        loadIgnoreRules(
+      const getIgnore = async () =>
+        await loadIgnoreRules(
           new FileDiscoveryService(tmpDir, {
             respectGitIgnore: true,
             respectGeminiIgnore: false,
@@ -400,7 +400,7 @@ describe('crawler', () => {
       });
 
       // Initial crawl to populate the cache
-      const ignore1 = getIgnore();
+      const ignore1 = await getIgnore();
       const results1 = await crawl(getOptions(ignore1));
       expect(results1).toEqual(
         expect.arrayContaining(['.', '.gitignore', 'b.txt']),
@@ -410,7 +410,7 @@ describe('crawler', () => {
       await fs.writeFile(path.join(tmpDir, '.gitignore'), 'b.txt');
 
       // Second crawl should miss the cache and trigger a recrawl
-      const ignore2 = getIgnore();
+      const ignore2 = await getIgnore();
       const results2 = await crawl(getOptions(ignore2));
       expect(results2).toEqual(
         expect.arrayContaining(['.', '.gitignore', 'a.txt']),
@@ -423,7 +423,7 @@ describe('crawler', () => {
         respectGitIgnore: false,
         respectGeminiIgnore: false,
       });
-      const ignore = loadIgnoreRules(service, []);
+      const ignore = await loadIgnoreRules(service, []);
       const options = {
         crawlDirectory: tmpDir,
         cwd: tmpDir,
@@ -453,7 +453,7 @@ describe('crawler', () => {
         respectGitIgnore: false,
         respectGeminiIgnore: false,
       });
-      const ignore = loadIgnoreRules(service, []);
+      const ignore = await loadIgnoreRules(service, []);
       const getOptions = (maxDepth?: number) => ({
         crawlDirectory: tmpDir,
         cwd: tmpDir,
@@ -504,7 +504,7 @@ describe('crawler', () => {
         respectGitIgnore: false,
         respectGeminiIgnore: false,
       });
-      const ignore = loadIgnoreRules(service, []);
+      const ignore = await loadIgnoreRules(service, []);
       const paths = await crawl({
         crawlDirectory: tmpDir,
         cwd: tmpDir,
@@ -579,7 +579,7 @@ describe('crawler', () => {
       respectGitIgnore: false,
       respectGeminiIgnore: false,
     });
-    const ignore = loadIgnoreRules(service, []);
+    const ignore = await loadIgnoreRules(service, []);
 
     const paths = await crawl({
       crawlDirectory: tmpDir,

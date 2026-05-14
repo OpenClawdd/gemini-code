@@ -11,18 +11,27 @@ import type { FileDiscoveryService } from '../../services/fileDiscoveryService.j
 
 const hasFileExtension = picomatch('**/*[*.]*');
 
-export function loadIgnoreRules(
+export async function loadIgnoreRules(
   service: FileDiscoveryService,
   ignoreDirs: string[] = [],
-): Ignore {
+): Promise<Ignore> {
   const ignorer = new Ignore();
   const ignoreFiles = service.getAllIgnoreFilePaths();
 
-  for (const filePath of ignoreFiles) {
-    try {
-      ignorer.add(fs.readFileSync(filePath, 'utf8'));
-    } catch {
-      // Skip files that can't be read (e.g. directories, permission errors)
+  const fileContents = await Promise.all(
+    ignoreFiles.map(async (filePath) => {
+      try {
+        return await fs.promises.readFile(filePath, 'utf8');
+      } catch {
+        // Skip files that can't be read (e.g. directories, permission errors)
+        return null;
+      }
+    }),
+  );
+
+  for (const content of fileContents) {
+    if (content !== null) {
+      ignorer.add(content);
     }
   }
 

@@ -85,7 +85,7 @@ describe('loadIgnoreRules', () => {
       respectGitIgnore: true,
       respectGeminiIgnore: false,
     });
-    const ignore = loadIgnoreRules(service, []);
+    const ignore = await loadIgnoreRules(service, []);
     const fileFilter = ignore.getFileFilter();
     expect(fileFilter('test.log')).toBe(true);
     expect(fileFilter('test.txt')).toBe(false);
@@ -99,7 +99,7 @@ describe('loadIgnoreRules', () => {
       respectGitIgnore: false,
       respectGeminiIgnore: true,
     });
-    const ignore = loadIgnoreRules(service, []);
+    const ignore = await loadIgnoreRules(service, []);
     const fileFilter = ignore.getFileFilter();
     expect(fileFilter('test.log')).toBe(true);
     expect(fileFilter('test.txt')).toBe(false);
@@ -115,7 +115,7 @@ describe('loadIgnoreRules', () => {
       respectGitIgnore: true,
       respectGeminiIgnore: true,
     });
-    const ignore = loadIgnoreRules(service, []);
+    const ignore = await loadIgnoreRules(service, []);
     const fileFilter = ignore.getFileFilter();
     expect(fileFilter('test.log')).toBe(true);
     expect(fileFilter('test.txt')).toBe(true);
@@ -128,7 +128,7 @@ describe('loadIgnoreRules', () => {
       respectGitIgnore: false,
       respectGeminiIgnore: false,
     });
-    const ignore = loadIgnoreRules(service, ['logs/']);
+    const ignore = await loadIgnoreRules(service, ['logs/']);
     const dirFilter = ignore.getDirectoryFilter();
     expect(dirFilter('logs/')).toBe(true);
     expect(dirFilter('src/')).toBe(false);
@@ -140,7 +140,7 @@ describe('loadIgnoreRules', () => {
       respectGitIgnore: true,
       respectGeminiIgnore: true,
     });
-    const ignore = loadIgnoreRules(service, []);
+    const ignore = await loadIgnoreRules(service, []);
     const fileFilter = ignore.getFileFilter();
     expect(fileFilter('anyfile.txt')).toBe(false);
   });
@@ -151,7 +151,7 @@ describe('loadIgnoreRules', () => {
       respectGitIgnore: false,
       respectGeminiIgnore: false,
     });
-    const ignore = loadIgnoreRules(service, []);
+    const ignore = await loadIgnoreRules(service, []);
     const dirFilter = ignore.getDirectoryFilter();
     expect(dirFilter('.git/')).toBe(true);
   });
