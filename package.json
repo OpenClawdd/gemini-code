@@ -70,7 +70,8 @@
     "telemetry": "node scripts/telemetry.js",
     "check:lockfile": "node scripts/check-lockfile.js",
     "clean": "node scripts/clean.js",
-    "pre-commit": "node scripts/pre-commit.js"
+    "pre-commit": "node scripts/pre-commit.js",
+    "gc:verify": "git diff --check && npm test -w @google/gemini-cli-core --ignore-scripts -- src/policy/autopilot-state.test.ts src/policy/policy-engine.test.ts && npm test -w @google/gemini-cli --ignore-scripts -- src/ui/commands/autopilotCommand.test.ts src/ui/commands/missionCommand.test.ts && npm run build -w @google/gemini-cli-core && npm run build -w @google/gemini-cli"
   },
   "overrides": {
     "ink": "npm:@jrichman/ink@6.6.9",
