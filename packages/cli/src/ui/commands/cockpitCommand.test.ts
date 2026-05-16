@@ -21,6 +21,10 @@ describe('cockpitCommand', () => {
     const context = createMockCommandContext();
 
     const online = await cockpitCommand.action!(context, '');
+    expect(online).toBeDefined();
+    if (!online) {
+      throw new Error('Expected cockpit command to return a message.');
+    }
     expect(online.type).toBe('message');
     if (online.type === 'message') {
       expect(online.content).toBe('Cockpit online.');
@@ -28,6 +32,10 @@ describe('cockpitCommand', () => {
     expect(getCockpitVisible()).toBe(true);
 
     const hidden = await cockpitCommand.action!(context, '');
+    expect(hidden).toBeDefined();
+    if (!hidden) {
+      throw new Error('Expected cockpit command to return a message.');
+    }
     expect(hidden.type).toBe('message');
     if (hidden.type === 'message') {
       expect(hidden.content).toBe('Cockpit hidden.');

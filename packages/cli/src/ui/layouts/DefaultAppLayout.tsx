@@ -23,9 +23,9 @@ import {
   useCockpitVisible,
 } from '../cockpit/CockpitState.js';
 import { StaticCockpitPanel } from '../cockpit/components/StaticCockpitPanel.js';
-import { useBuddyState } from '../companion/BuddyState.js';
 import { BuddyPanel } from '../companion/components/BuddyPanel.js';
 import { useKeypress } from '../hooks/useKeypress.js';
+import { useBuddyState } from '../companion/BuddyState.js';
 
 export const DefaultAppLayout: React.FC = () => {
   const uiState = useUIState();
@@ -57,11 +57,7 @@ export const DefaultAppLayout: React.FC = () => {
       flexGrow={0}
       ref={uiState.rootUiRef}
     >
-      {isCockpitVisible && (
-        <StaticCockpitPanel
-          polluxMessage={buddy.visible ? buddy.message : undefined}
-        />
-      )}
+      {isCockpitVisible && <StaticCockpitPanel />}
       {!isCockpitVisible && buddy.visible && <BuddyPanel />}
 
       <MainContent />
