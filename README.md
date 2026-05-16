@@ -22,8 +22,9 @@ Learn all about upstream Gemini CLI in the
 
 ## gemini-code cockpit layer
 
-- **Mission Cockpit**: `/mission` creates a structured mission brief and
-  `/cockpit` opens a compact mission-control panel.
+- **Mission Cockpit**: `/mission <task>` starts an execution-oriented mission
+  loop with safe repo inspection, `/mission plan <task>` keeps the old
+  brief-only behavior, and `/cockpit` opens a compact mission-control panel.
 - **Pollux**: `/buddy` toggles a status companion for real events and cockpit
   messages.
 - **Autopilot Command Gate**: mission-aware command hygiene can allow safe local
