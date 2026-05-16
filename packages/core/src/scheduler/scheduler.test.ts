@@ -69,6 +69,10 @@ import type { Config } from '../config/config.js';
 import type { MessageBus } from '../confirmation-bus/message-bus.js';
 import type { PolicyEngine } from '../policy/policy-engine.js';
 import type { ToolRegistry } from '../tools/tool-registry.js';
+import {
+  clearDeferredCommands,
+  listDeferredCommands,
+} from '../policy/deferred-command-queue.js';
 import { PolicyDecision, ApprovalMode } from '../policy/types.js';
 import {
   ToolConfirmationOutcome,
@@ -159,8 +163,10 @@ describe('Scheduler (Orchestrator)', () => {
     signal = abortController.signal;
 
     // --- Setup Injected Mocks ---
+    clearDeferredCommands();
     mockPolicyEngine = {
       check: vi.fn().mockResolvedValue({ decision: PolicyDecision.ALLOW }),
+      getAutopilotMission: vi.fn().mockReturnValue('fix README typo'),
     } as unknown as Mocked<PolicyEngine>;
 
     mockToolRegistry = {
@@ -687,6 +693,37 @@ describe('Scheduler (Orchestrator)', () => {
               }),
             }),
           ]),
+        }),
+      );
+    });
+
+    it('should turn DEFER into a queued virtual success without confirmation or execution', async () => {
+      vi.mocked(checkPolicy).mockResolvedValue({
+        decision: PolicyDecision.DEFER,
+        reason:
+          'Autopilot unattended defers permission-needed commands for review.',
+      });
+
+      await scheduler.schedule(req1, signal);
+
+      expect(resolveConfirmation).not.toHaveBeenCalled();
+      expect(mockExecutor.execute).not.toHaveBeenCalled();
+      expect(listDeferredCommands()).toEqual([
+        expect.objectContaining({
+          command: '<unknown command>',
+          reason:
+            'Autopilot unattended defers permission-needed commands for review.',
+          toolName: req1.name,
+          callId: 'call-1',
+          mission: 'fix README typo',
+        }),
+      ]);
+      expect(mockStateManager.updateStatus).toHaveBeenCalledWith(
+        'call-1',
+        CoreToolCallStatus.Success,
+        expect.objectContaining({
+          resultDisplay:
+            'Command deferred by Autopilot: Autopilot unattended defers permission-needed commands for review. It did not run. Continuing unattended work.',
         }),
       );
     });

@@ -12,6 +12,7 @@ export enum PolicyDecision {
   DENY = 'deny',
   ASK_USER = 'ask_user',
   SUPPRESS = 'suppress',
+  DEFER = 'defer',
 }
 
 /**
@@ -284,6 +285,8 @@ export interface PolicyEngineConfig {
    * Autopilot Command Gate before normal confirmation policy.
    */
   autopilotMission?: string;
+  /** Current gemini-code Autopilot mode. Unattended maps shell ASK decisions to DEFER. */
+  autopilotMode?: import('./autopilot-state.js').AutopilotMode;
   /**
    * List of policy rules to apply.
    */

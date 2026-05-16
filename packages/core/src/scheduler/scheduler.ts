@@ -27,6 +27,7 @@ import {
 } from './types.js';
 import { ToolErrorType } from '../tools/tool-error.js';
 import { UPDATE_TOPIC_TOOL_NAME } from '../tools/tool-names.js';
+import { enqueueDeferredCommand } from '../policy/deferred-command-queue.js';
 import { PolicyDecision, type ApprovalMode } from '../policy/types.js';
 import {
   ToolConfirmationOutcome,
@@ -50,6 +51,11 @@ import {
   type McpProgressPayload,
 } from '../utils/events.js';
 import { GeminiCliOperation } from '../telemetry/constants.js';
+
+function getShellCommandArg(args: Record<string, unknown>): string {
+  const command = args['command'];
+  return typeof command === 'string' ? command : '<unknown command>';
+}
 
 interface SchedulerQueueItem {
   requests: ToolCallRequestInfo[];
@@ -661,6 +667,30 @@ export class Scheduler {
       const message = `Command suppressed by Autopilot: ${
         policyReason ?? 'Tiny docs-only mission does not need command ceremony.'
       }`;
+
+      this.state.updateStatus(
+        callId,
+        CoreToolCallStatus.Success,
+        createSuccessResponse(toolCall.request, message),
+      );
+      return;
+    }
+
+    if (decision === PolicyDecision.DEFER) {
+      const reason =
+        policyReason ??
+        'Autopilot unattended defers permission-needed commands for review.';
+      const command = getShellCommandArg(toolCall.request.args);
+      const normalizedReason = reason.replace(/[.!?]+$/, '');
+      const mission = this.config.getPolicyEngine().getAutopilotMission();
+      enqueueDeferredCommand({
+        command,
+        reason,
+        toolName: toolCall.request.name,
+        callId,
+        mission,
+      });
+      const message = `Command deferred by Autopilot: ${normalizedReason}. It did not run. Continuing unattended work.`;
 
       this.state.updateStatus(
         callId,

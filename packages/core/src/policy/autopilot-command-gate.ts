@@ -23,14 +23,34 @@ export interface AutopilotCommandGateResult {
 
 const destructivePatterns = [
   /(^|\s)rm\s+-rf(\s|$)/i,
-  /(^|\s)git\s+push(\s|$)/i,
+  /(^|\s)git\s+push(?:\s|$)/i,
   /(^|\s)sudo\s+/i,
+  /curl\b[^|;&]*\|\s*(?:bash|sh|zsh)\b/i,
+  /(^|\s)git\s+reset\s+--hard(?:\s|$)/i,
+  /(^|\s)git\s+clean\s+-[a-z]*f[a-z]*(?:\s|$)/i,
+  /(^|\s)git\s+checkout\s+-f(?:\s|$)/i,
+  /(^|\s)git\s+.*\s--force(?:\s|$)/i,
+  /(^|\s)npm\s+publish\b.*\s--force(?:\s|$)/i,
 ];
 
-const broadTestPatterns = [
+const broadValidationPatterns = [
   /^npm\s+test(?:\s|$)/i,
   /^npm\s+run\s+test(?::\w+)?(?:\s|$)/i,
   /^npm\s+run\s+format(?:\s|$)/i,
+  /^npm\s+run\s+lint(?:\s|$)/i,
+  /^npm\s+run\s+typecheck(?:\s|$)/i,
+  /^npm\s+run\s+build(?:\s|$)/i,
+];
+
+const safeReadOnlyPatterns = [
+  /^pwd$/i,
+  /^git\s+status(?:\s+--short)?$/i,
+  /^git\s+branch\s+--show-current$/i,
+  /^git\s+log\s+-n\s+\d+\s+--oneline$/i,
+  /^git\s+diff$/i,
+  /^ls(?:\s+-[\w-]+)?(?:\s+[\w./-]+)?$/i,
+  /^cat\s+[\w./-]+$/i,
+  /^(?:rg|grep)\s+(?:-[\w-]+\s+)?[\w'"./:-]+(?:\s+[\w./-]+)?$/i,
 ];
 
 function normalize(value: string): string {
@@ -46,8 +66,29 @@ function missionProtectsCore(mission: string): boolean {
   );
 }
 
+function missionRequestsValidation(mission: string): boolean {
+  const normalizedMission = mission.toLowerCase();
+  return /\b(run|do|perform|execute|check|validate|verify)\b.*\b(test|tests|lint|typecheck|build|validation|checks)\b/.test(
+    normalizedMission,
+  );
+}
+
 function commandTargetsCore(command: string): boolean {
   return /(^|\s)(packages\/core|packages\\core|core)(\s|$)/i.test(command);
+}
+
+function isCompoundCommand(command: string): boolean {
+  return /(?:&&|\|\||;|\|)/.test(command);
+}
+
+function isBroadValidationCommand(command: string): boolean {
+  return broadValidationPatterns.some((pattern) => pattern.test(command));
+}
+
+export function isAutopilotHardDeniedCommand(command: string): boolean {
+  return destructivePatterns.some((pattern) =>
+    pattern.test(normalize(command)),
+  );
 }
 
 export function evaluateAutopilotCommand({
@@ -63,7 +104,7 @@ export function evaluateAutopilotCommand({
     };
   }
 
-  if (destructivePatterns.some((pattern) => pattern.test(normalizedCommand))) {
+  if (isAutopilotHardDeniedCommand(normalizedCommand)) {
     return {
       decision: AutopilotCommandDecision.DENY,
       reason: 'Destructive or remote-mutating commands stay behind the gate.',
@@ -81,22 +122,33 @@ export function evaluateAutopilotCommand({
     };
   }
 
-  if (broadTestPatterns.some((pattern) => pattern.test(normalizedCommand))) {
+  if (isBroadValidationCommand(normalizedCommand)) {
+    if (missionRequestsValidation(mission)) {
+      return {
+        decision: AutopilotCommandDecision.ASK,
+        reason:
+          'User-requested validation should not be suppressed as ritual ceremony.',
+      };
+    }
+
     return {
       decision: AutopilotCommandDecision.SUPPRESS,
       reason: 'Tiny docs-only mission does not need command ceremony.',
     };
   }
 
-  if (normalizedCommand === 'git diff') {
+  if (
+    !isCompoundCommand(normalizedCommand) &&
+    safeReadOnlyPatterns.some((pattern) => pattern.test(normalizedCommand))
+  ) {
     return {
       decision: AutopilotCommandDecision.ALLOW,
-      reason: 'Local diff inspection is safe and useful.',
+      reason: 'Read-only local inspection is safe and useful.',
     };
   }
 
   return {
     decision: AutopilotCommandDecision.ASK,
-    reason: 'Command is not covered by the GC autopilot gate yet.',
+    reason: 'Command is not covered by the gemini-code autopilot gate yet.',
   };
 }

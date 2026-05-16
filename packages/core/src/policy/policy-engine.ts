@@ -30,7 +30,9 @@ import { stableStringify } from './stable-stringify.js';
 import {
   AutopilotCommandDecision,
   evaluateAutopilotCommand,
+  isAutopilotHardDeniedCommand,
 } from './autopilot-command-gate.js';
+import { AutopilotMode } from './autopilot-state.js';
 import { debugLogger } from '../utils/debugLogger.js';
 import { isRecord } from '../utils/markdownUtils.js';
 import type { CheckerRunner } from '../safety/checker-runner.js';
@@ -205,6 +207,7 @@ export class PolicyEngine {
   private hookCheckers: HookCheckerRule[];
   private readonly defaultDecision: PolicyDecision;
   private autopilotMission: string | undefined;
+  private autopilotMode: AutopilotMode;
   private readonly nonInteractive: boolean;
   private readonly disableAlwaysAllow: boolean;
   private readonly checkerRunner?: CheckerRunner;
@@ -263,6 +266,7 @@ export class PolicyEngine {
     this.checkerRunner = checkerRunner;
     this.approvalMode = config.approvalMode ?? ApprovalMode.DEFAULT;
     this.autopilotMission = config.autopilotMission;
+    this.autopilotMode = config.autopilotMode ?? AutopilotMode.OFF;
     this.sandboxManager = config.sandboxManager ?? new NoopSandboxManager();
   }
 
@@ -286,6 +290,25 @@ export class PolicyEngine {
 
   getAutopilotMission(): string | undefined {
     return this.autopilotMission;
+  }
+
+  setAutopilotMode(mode: AutopilotMode): void {
+    this.autopilotMode = mode;
+  }
+
+  getAutopilotMode(): AutopilotMode {
+    return this.autopilotMode;
+  }
+
+  private shouldDeferForUnattended(
+    decision: PolicyDecision,
+    isShellCommand: boolean,
+  ): boolean {
+    return (
+      this.autopilotMode === AutopilotMode.UNATTENDED &&
+      isShellCommand &&
+      decision === PolicyDecision.ASK_USER
+    );
   }
 
   private isAlwaysAllowRule(rule: PolicyRule): boolean {
@@ -317,7 +340,18 @@ export class PolicyEngine {
   private checkAutopilotCommandGate(
     command: string | undefined,
   ): CheckResult | undefined {
-    if (!command || !this.autopilotMission) {
+    if (!command) {
+      return undefined;
+    }
+
+    if (isAutopilotHardDeniedCommand(command)) {
+      return {
+        decision: PolicyDecision.DENY,
+        reason: 'Destructive or remote-mutating commands stay behind the gate.',
+      };
+    }
+
+    if (!this.autopilotMission) {
       return undefined;
     }
 
@@ -334,7 +368,7 @@ export class PolicyEngine {
       case AutopilotCommandDecision.DENY:
         return { decision: PolicyDecision.DENY, reason: result.reason };
       case AutopilotCommandDecision.ASK:
-        return undefined;
+        return { decision: PolicyDecision.ASK_USER, reason: result.reason };
       default: {
         const _exhaustive: never = result.decision;
         return _exhaustive;
@@ -360,6 +394,13 @@ export class PolicyEngine {
             `[PolicyEngine.check] Command evaluated as dangerous, but YOLO mode is active. Preserving decision: ${command}`,
           );
           return decision;
+        }
+
+        if (this.autopilotMode === AutopilotMode.UNATTENDED) {
+          debugLogger.debug(
+            `[PolicyEngine.check] Command evaluated as dangerous in unattended Autopilot, forcing DENY: ${command}`,
+          );
+          return PolicyDecision.DENY;
         }
 
         debugLogger.debug(
@@ -489,9 +530,18 @@ export class PolicyEngine {
 
         if (
           wrapperResult.decision === PolicyDecision.DENY ||
-          wrapperResult.decision === PolicyDecision.SUPPRESS
-        )
-          return wrapperResult;
+          wrapperResult.decision === PolicyDecision.SUPPRESS ||
+          wrapperResult.decision === PolicyDecision.DEFER
+        ) {
+          return wrapperResult.decision === PolicyDecision.DEFER
+            ? {
+                ...wrapperResult,
+                reason:
+                  wrapperResult.reason ??
+                  'Autopilot unattended defers permission-needed commands for review.',
+              }
+            : wrapperResult;
+        }
         if (wrapperResult.decision === PolicyDecision.ASK_USER) {
           if (aggregateDecision === PolicyDecision.ALLOW) {
             responsibleRule = wrapperResult.rule;
@@ -513,9 +563,18 @@ export class PolicyEngine {
 
         if (
           subResult.decision === PolicyDecision.DENY ||
-          subResult.decision === PolicyDecision.SUPPRESS
-        )
-          return subResult;
+          subResult.decision === PolicyDecision.SUPPRESS ||
+          subResult.decision === PolicyDecision.DEFER
+        ) {
+          return subResult.decision === PolicyDecision.DEFER
+            ? {
+                ...subResult,
+                reason:
+                  subResult.reason ??
+                  'Autopilot unattended defers permission-needed commands for review.',
+              }
+            : subResult;
+        }
 
         if (subResult.decision === PolicyDecision.ASK_USER) {
           if (aggregateDecision === PolicyDecision.ALLOW) {
@@ -605,6 +664,13 @@ export class PolicyEngine {
         debugLogger.debug(
           `[PolicyEngine.check] Autopilot command gate decided ${autopilotResult.decision}: ${autopilotResult.reason ?? 'no reason'}`,
         );
+        if (this.shouldDeferForUnattended(autopilotResult.decision, true)) {
+          return {
+            decision: PolicyDecision.DEFER,
+            reason: autopilotResult.reason,
+            rule: autopilotResult.rule,
+          };
+        }
         return autopilotResult;
       }
     }
@@ -612,6 +678,7 @@ export class PolicyEngine {
     // Find the first matching rule (already sorted by priority)
     let matchedRule: PolicyRule | undefined;
     let decision: PolicyDecision | undefined;
+    let decisionReason: string | undefined;
 
     // We also want to check legacy aliases for the tool name.
     const toolNamesToTry = toolCall.name ? getToolAliases(toolCall.name) : [];
@@ -679,6 +746,7 @@ export class PolicyEngine {
           );
           decision = shellResult.decision;
           matchedRule = shellResult.rule;
+          decisionReason = shellResult.reason;
           break;
         } else {
           decision = ruleDecision;
@@ -724,6 +792,7 @@ export class PolicyEngine {
         );
         decision = shellResult.decision;
         matchedRule = shellResult.rule;
+        decisionReason = shellResult.reason;
       } else {
         decision = this.defaultDecision;
       }
@@ -763,6 +832,7 @@ export class PolicyEngine {
     if (
       decision !== PolicyDecision.DENY &&
       decision !== PolicyDecision.SUPPRESS &&
+      decision !== PolicyDecision.DEFER &&
       this.checkerRunner
     ) {
       for (const checkerRule of this.checkers) {
@@ -814,9 +884,20 @@ export class PolicyEngine {
       }
     }
 
+    if (this.shouldDeferForUnattended(decision, isShellCommand)) {
+      return {
+        decision: PolicyDecision.DEFER,
+        rule: matchedRule,
+        reason:
+          decisionReason ??
+          'Autopilot unattended defers permission-needed commands for review.',
+      };
+    }
+
     return {
       decision,
       rule: matchedRule,
+      reason: decisionReason,
     };
   }
 

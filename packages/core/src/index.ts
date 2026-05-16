@@ -312,3 +312,5 @@ export * from './voice/whisperTranscriptionProvider.js';
 export * from './voice/transcriptionFactory.js';
 export * from './voice/whisperModelManager.js';
 export { isBinaryAvailable } from './utils/binaryCheck.js';
+export * from './policy/autopilot-state.js';
+export * from './policy/deferred-command-queue.js';
