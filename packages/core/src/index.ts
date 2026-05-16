@@ -16,6 +16,7 @@ export * from './output/json-formatter.js';
 export * from './output/stream-json-formatter.js';
 export * from './policy/types.js';
 export * from './policy/policy-engine.js';
+export * from './policy/autopilot-command-gate.js';
 export * from './policy/toml-loader.js';
 export * from './policy/config.js';
 export * from './policy/integrity.js';
@@ -29,6 +30,7 @@ export * from './confirmation-bus/message-bus.js';
 export * from './commands/extensions.js';
 export * from './commands/restore.js';
 export * from './commands/init.js';
+export * from './commands/mission.js';
 export * from './commands/memory.js';
 export * from './commands/types.js';
 

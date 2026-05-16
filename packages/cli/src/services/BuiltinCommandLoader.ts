@@ -23,9 +23,11 @@ import { agentsCommand } from '../ui/commands/agentsCommand.js';
 import { authCommand } from '../ui/commands/authCommand.js';
 import { bugCommand } from '../ui/commands/bugCommand.js';
 import { bugMemoryCommand } from '../ui/commands/bugMemoryCommand.js';
+import { buddyCommand } from '../ui/commands/buddyCommand.js';
 import { chatCommand, debugCommand } from '../ui/commands/chatCommand.js';
 import { clearCommand } from '../ui/commands/clearCommand.js';
 import { commandsCommand } from '../ui/commands/commandsCommand.js';
+import { cockpitCommand } from '../ui/commands/cockpitCommand.js';
 import { compressCommand } from '../ui/commands/compressCommand.js';
 import { copyCommand } from '../ui/commands/copyCommand.js';
 import { corgiCommand } from '../ui/commands/corgiCommand.js';
@@ -41,6 +43,7 @@ import { rewindCommand } from '../ui/commands/rewindCommand.js';
 import { hooksCommand } from '../ui/commands/hooksCommand.js';
 import { ideCommand } from '../ui/commands/ideCommand.js';
 import { initCommand } from '../ui/commands/initCommand.js';
+import { missionCommand } from '../ui/commands/missionCommand.js';
 import { mcpCommand } from '../ui/commands/mcpCommand.js';
 import { memoryCommand } from '../ui/commands/memoryCommand.js';
 import { modelCommand } from '../ui/commands/modelCommand.js';
@@ -126,12 +129,14 @@ export class BuiltinCommandLoader implements ICommandLoader {
       authCommand,
       bugCommand,
       bugMemoryCommand,
+      buddyCommand,
       {
         ...chatCommand,
         subCommands: chatResumeSubCommands,
       },
       clearCommand,
       commandsCommand,
+      cockpitCommand,
       compressCommand,
       copyCommand,
       corgiCommand,
@@ -167,6 +172,7 @@ export class BuiltinCommandLoader implements ICommandLoader {
       rewindCommand,
       await ideCommand(),
       initCommand,
+      missionCommand,
       ...(isNightlyBuild ? [oncallCommand] : []),
       ...(this.config?.getMcpEnabled() === false
         ? [
