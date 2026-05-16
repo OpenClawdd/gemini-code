@@ -31,6 +31,7 @@ import {
   AutopilotCommandDecision,
   evaluateAutopilotCommand,
 } from './autopilot-command-gate.js';
+import { evaluateAutopilotEdit } from './autopilot-edit-gate.js';
 import {
   recordAutopilotEvent,
   type AutopilotEventDecision,
@@ -331,7 +332,7 @@ export class PolicyEngine {
       command,
     });
 
-    const isUnattended = getAutopilotMode() === 'unattended';
+    const isUnattended = getAutopilotMode() !== 'normal';
     let eventDecision: AutopilotEventDecision;
 
     switch (result.decision) {
@@ -851,6 +852,66 @@ export class PolicyEngine {
             };
           }
         }
+      }
+    }
+
+    const filePath = toolCall.args?.['file_path'];
+    if (
+      decision === PolicyDecision.ASK_USER &&
+      (toolName === 'replace' || toolName === 'write_file') &&
+      this.autopilotMission &&
+      typeof filePath === 'string'
+    ) {
+      const mode = getAutopilotMode();
+      if (mode !== 'normal') {
+        const editResult = evaluateAutopilotEdit({
+          mission: this.autopilotMission,
+          filePath,
+        });
+
+        let eventDecision: AutopilotEventDecision;
+        let reason = editResult.reason;
+
+        if (mode === 'fully-unattended') {
+          switch (editResult.decision) {
+            case AutopilotCommandDecision.ALLOW:
+              decision = PolicyDecision.ALLOW;
+              eventDecision = 'allow';
+              break;
+            case AutopilotCommandDecision.DENY:
+              decision = PolicyDecision.DENY;
+              eventDecision = 'deny';
+              break;
+            case AutopilotCommandDecision.ASK:
+            case AutopilotCommandDecision.SUPPRESS:
+            default:
+              decision = PolicyDecision.DEFER;
+              eventDecision = 'defer';
+              break;
+          }
+        } else {
+          // semi-unattended
+          decision = PolicyDecision.DEFER;
+          eventDecision = 'defer';
+          reason = `Autopilot (semi-unattended): ${editResult.reason}`;
+        }
+
+        recordAutopilotEvent({
+          command: `edit ${
+            typeof toolCall.args?.['file_path'] === 'string'
+              ? toolCall.args['file_path']
+              : 'unknown-file'
+          }`,
+          decision: eventDecision,
+          reason: editResult.reason,
+          missionText: this.autopilotMission,
+        });
+
+        return {
+          decision,
+          reason,
+          rule: matchedRule,
+        };
       }
     }
 

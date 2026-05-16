@@ -26,13 +26,37 @@ describe('autopilotCommand', () => {
     expect(result.content).toContain('Autopilot Mode:');
   });
 
-  it('sets unattended mode', async () => {
+  it('sets semi-unattended mode', async () => {
+    const result = await autopilotCommand.action?.(
+      mockContext,
+      'semi-unattended',
+    );
+    if (!result || typeof result === 'string' || result.type !== 'message') {
+      throw new Error('Expected message result');
+    }
+    expect(result.content).toContain('SEMI-UNATTENDED');
+    expect(getAutopilotMode()).toBe('semi-unattended');
+  });
+
+  it('sets fully-unattended mode', async () => {
+    const result = await autopilotCommand.action?.(
+      mockContext,
+      'fully-unattended',
+    );
+    if (!result || typeof result === 'string' || result.type !== 'message') {
+      throw new Error('Expected message result');
+    }
+    expect(result.content).toContain('FULLY-UNATTENDED');
+    expect(getAutopilotMode()).toBe('fully-unattended');
+  });
+
+  it('maps unattended to semi-unattended', async () => {
     const result = await autopilotCommand.action?.(mockContext, 'unattended');
     if (!result || typeof result === 'string' || result.type !== 'message') {
       throw new Error('Expected message result');
     }
-    expect(result.content).toContain('UNATTENDED');
-    expect(getAutopilotMode()).toBe('unattended');
+    expect(result.content).toContain('SEMI-UNATTENDED');
+    expect(getAutopilotMode()).toBe('semi-unattended');
   });
 
   it('sets normal mode', async () => {

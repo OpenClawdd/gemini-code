@@ -28,13 +28,34 @@ export const autopilotCommand: SlashCommand = {
       };
     }
 
-    if (subcommand === 'unattended') {
-      setAutopilotMode('unattended');
+    if (subcommand === 'semi-unattended') {
+      setAutopilotMode('semi-unattended');
       return {
         type: 'message',
         messageType: 'info',
         content:
-          'Autopilot mode set to UNATTENDED (will defer commands needing approval).',
+          'Autopilot mode set to SEMI-UNATTENDED (will defer commands needing approval).',
+      };
+    }
+
+    if (subcommand === 'fully-unattended') {
+      setAutopilotMode('fully-unattended');
+      return {
+        type: 'message',
+        messageType: 'info',
+        content:
+          'Autopilot mode set to FULLY-UNATTENDED (will auto-apply safe edits, defer/block risky actions).',
+      };
+    }
+
+    // backwards compatibility for 'unattended' mapped to 'semi-unattended'
+    if (subcommand === 'unattended') {
+      setAutopilotMode('semi-unattended');
+      return {
+        type: 'message',
+        messageType: 'info',
+        content:
+          'Autopilot mode set to SEMI-UNATTENDED (will defer commands needing approval).',
       };
     }
 
@@ -49,7 +70,8 @@ export const autopilotCommand: SlashCommand = {
     return {
       type: 'message',
       messageType: 'error',
-      content: 'Usage: /autopilot [normal|unattended|status]',
+      content:
+        'Usage: /autopilot [normal|semi-unattended|fully-unattended|status]',
     };
   },
 };

@@ -28,7 +28,9 @@ export const StaticCockpitPanel: React.FC = () => {
   const riskLevel = missionCouncil?.riskOfficer.riskLevel ?? 'Safe';
   const riskColor =
     riskLevel === 'Safe' ? 'green' : riskLevel === 'Medium' ? 'yellow' : 'red';
-  const nextAction = missionCouncil?.finalRoute.firstAction;
+  const { nextActionOverride } = useCockpitState();
+  const nextAction =
+    nextActionOverride ?? missionCouncil?.finalRoute.firstAction;
 
   const statusColor =
     buddy.mood === 'blocked'

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type AutopilotMode = 'normal' | 'unattended';
+export type AutopilotMode = 'normal' | 'semi-unattended' | 'fully-unattended';
 
 let currentMode: AutopilotMode = 'normal';
 const listeners = new Set<() => void>();

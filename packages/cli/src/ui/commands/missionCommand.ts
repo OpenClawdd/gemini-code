@@ -9,7 +9,9 @@ import process from 'node:process';
 import {
   activateCockpitMission,
   setCurrentPhase,
-} from '../cockpit/CockpitState.js';
+
+  setCockpitNextAction,
+  setCockpitSkippedPhases} from '../cockpit/CockpitState.js';
 import { MissionRunner, formatMissionReport } from './mission/MissionRunner.js';
 import type { MissionMode } from './mission/types.js';
 import {
@@ -43,11 +45,8 @@ export const missionCommand: SlashCommand = {
   action: async (
     context,
     userRequest: string,
-  ): Promise<SlashCommandActionReturn> => runMissionCommand(
-      context,
-      userRequest,
-      parseMissionMode(userRequest),
-    ),
+  ): Promise<SlashCommandActionReturn> =>
+    runMissionCommand(context, userRequest, parseMissionMode(userRequest)),
 };
 
 export function parseMissionMode(args: string): MissionMode {
@@ -116,6 +115,12 @@ async function runMissionCommand(
   });
 
   const report = await runner.run();
+
+  if (report.limitation) {
+    setCockpitSkippedPhases(['Edit', 'Test']);
+    setCockpitNextAction('Review inspection results. Ready for next step.');
+  }
+
   setCurrentPhase(report.limitation ? 'Next Action' : 'Review');
 
   return {

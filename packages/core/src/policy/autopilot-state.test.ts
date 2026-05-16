@@ -16,8 +16,13 @@ describe('AutopilotState', () => {
     expect(getAutopilotMode()).toBe('normal');
   });
 
-  it('sets unattended mode', () => {
-    setAutopilotMode('unattended');
-    expect(getAutopilotMode()).toBe('unattended');
+  it('sets semi-unattended mode', () => {
+    setAutopilotMode('semi-unattended');
+    expect(getAutopilotMode()).toBe('semi-unattended');
+  });
+
+  it('sets fully-unattended mode', () => {
+    setAutopilotMode('fully-unattended');
+    expect(getAutopilotMode()).toBe('fully-unattended');
   });
 });

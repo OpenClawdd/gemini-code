@@ -7,6 +7,7 @@
 import type React from 'react';
 import { Box, Text } from 'ink';
 import { PHASES, type Phase } from '../CockpitState.js';
+import { useCockpitState } from '../CockpitState.js';
 
 interface PhaseStatusPanelProps {
   activePhase: Phase;
@@ -15,20 +16,27 @@ interface PhaseStatusPanelProps {
 export const PhaseStatusPanel: React.FC<PhaseStatusPanelProps> = ({
   activePhase,
 }) => {
+  const { skippedPhases } = useCockpitState();
   const activeIndex = PHASES.indexOf(activePhase);
 
   return (
     <Box flexDirection="row" flexWrap="wrap">
       {PHASES.map((phase, index) => {
-        const isCompleted = index < activeIndex;
-        const isActive = index === activeIndex;
-        const isFuture = index > activeIndex;
+        const isSkipped = skippedPhases.includes(phase);
+        const isCompleted = index < activeIndex && !isSkipped;
+        const isActive = index === activeIndex && !isSkipped;
+        const isFuture = index > activeIndex && !isSkipped;
 
         let icon = '  ';
         let color: string | undefined;
         let dim = false;
+        let strikethrough = false;
 
-        if (isCompleted) {
+        if (isSkipped) {
+          icon = '○ ';
+          dim = true;
+          strikethrough = true;
+        } else if (isCompleted) {
           icon = '✔ ';
           color = 'green';
         } else if (isActive) {
@@ -40,7 +48,12 @@ export const PhaseStatusPanel: React.FC<PhaseStatusPanelProps> = ({
 
         return (
           <Box key={phase} marginRight={1}>
-            <Text color={color} dimColor={dim} bold={isActive}>
+            <Text
+              color={color}
+              dimColor={dim}
+              bold={isActive}
+              strikethrough={strikethrough}
+            >
               {icon}
               {phase}
             </Text>

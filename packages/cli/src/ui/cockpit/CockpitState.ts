@@ -40,6 +40,8 @@ let currentMissionBrief: MissionBrief | null = null;
 let currentMissionCouncil: MissionCouncilResult | null = null;
 let currentPhase: Phase = 'Mission';
 let cockpitDetailsExpanded = false;
+let skippedPhases: Phase[] = [];
+let nextActionOverride: string | null = null;
 const listeners = new Set<() => void>();
 
 function notifyCockpitListeners(): void {
@@ -70,6 +72,20 @@ export function getCurrentPhase(): string {
 
 export function getCockpitDetailsExpanded(): boolean {
   return cockpitDetailsExpanded;
+}
+
+export function getSkippedPhases(): Phase[] {
+  return skippedPhases;
+}
+
+export function setCockpitSkippedPhases(phases: Phase[]): void {
+  skippedPhases = phases;
+  notifyCockpitListeners();
+}
+
+export function setCockpitNextAction(action: string | null): void {
+  nextActionOverride = action;
+  notifyCockpitListeners();
 }
 
 export function setCurrentPhase(phase: Phase): void {
@@ -138,6 +154,8 @@ export function getCockpitState(): CockpitState {
     missionBrief: currentMissionBrief ?? undefined,
     missionCouncil: currentMissionCouncil ?? undefined,
     phase: currentPhase,
+    skippedPhases,
+    nextActionOverride: nextActionOverride ?? undefined,
     detailsExpanded: cockpitDetailsExpanded,
     recentEvents: [...recentEvents],
     latestEvent,
@@ -152,6 +170,8 @@ export interface CockpitState {
   missionBrief?: MissionBrief;
   missionCouncil?: MissionCouncilResult;
   phase: Phase;
+  skippedPhases: Phase[];
+  nextActionOverride?: string;
   detailsExpanded: boolean;
   recentEvents: AutopilotEvent[];
   latestEvent?: AutopilotEvent;

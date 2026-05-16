@@ -251,7 +251,7 @@ describe('PolicyEngine', () => {
     });
 
     it('should defer explicitly requested validation commands in unattended mode', async () => {
-      setAutopilotMode('unattended');
+      setAutopilotMode('semi-unattended');
       clearAutopilotEvents();
       engine = new PolicyEngine({
         autopilotMission: 'run validation tests',
@@ -270,7 +270,7 @@ describe('PolicyEngine', () => {
     });
 
     it('should still suppress ritual tests for docs-only missions in unattended mode', async () => {
-      setAutopilotMode('unattended');
+      setAutopilotMode('semi-unattended');
       clearAutopilotEvents();
       engine = new PolicyEngine({
         autopilotMission: 'fix README typo',
@@ -289,7 +289,7 @@ describe('PolicyEngine', () => {
     });
 
     it('should return DEFER for commands needing approval in unattended mode', async () => {
-      setAutopilotMode('unattended');
+      setAutopilotMode('semi-unattended');
       engine = new PolicyEngine({
         autopilotMission: 'test mission',
       });
