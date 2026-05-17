@@ -6,11 +6,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { InitCommand } from './init.js';
-import {
-  performInit,
-  type CommandActionReturn,
-  type Config,
-} from '@google/gemini-cli-core';
+import { performInit, type Config } from '@google/gemini-cli-core';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { CoderAgentExecutor } from '../agent/executor.js';
@@ -90,7 +86,7 @@ describe('InitCommand', () => {
         type: 'message',
         messageType: 'info',
         content: 'GEMINI.md already exists.',
-      } as CommandActionReturn);
+      });
 
       await command.execute(context, []);
 
@@ -125,7 +121,7 @@ describe('InitCommand', () => {
         type: 'message',
         messageType: 'error',
         content: 'An error occurred.',
-      } as CommandActionReturn);
+      });
 
       await command.execute(context, []);
 
@@ -147,7 +143,7 @@ describe('InitCommand', () => {
         vi.mocked(performInit).mockReturnValue({
           type: 'submit_prompt',
           content: 'Create a new GEMINI.md file.',
-        } as CommandActionReturn);
+        });
       });
 
       it('writes the file and executes the agent', async () => {
